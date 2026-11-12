@@ -4,7 +4,7 @@ import { workdays } from '@/lib/workdays';
 const id=z.string().uuid();
 const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s=>!isNaN(Date.parse(s))&&new Date(s).toISOString().slice(0,10)===s);
 const geo=z.object({lat:z.number().min(-90).max(90),lng:z.number().min(-180).max(180),accuracy:z.number().nonnegative()});
-const accessRole=z.enum(['planer','obermonteur','monteur']);
+const accessRole=z.enum(['planer','obermonteur','monteur','buchhaltung']);
 const managementActions=new Set(['customer','contact','resource','reorderResources','reorderProjects','archiveProject','archiveResource','project','deleteContact','deleteCustomer','assign','deleteAssignment','unassign','delete']);
 function out(data:unknown,status=200){return Response.json(data,{status,headers:{'Cache-Control':'no-store'}})}
 const logged=new Set(['user','deleteUser','employee','resource','archiveResource','archiveProject','project','delete','assign','deleteAssignment','unassign','customer','contact','deleteCustomer','deleteContact','requestVacation','withdrawVacation','decideVacation']);
@@ -40,7 +40,7 @@ function scopeData(full:Record<string,any[]>,user:CurrentUser){
     resources:full.resources.filter((rr:any)=>rr.id===user.resourceId),
     customers:[],
     contacts:[],
-    projects:full.projects.filter((p:any)=>projectIds.has(p.id)),
+    projects:full.projects.filter((p:any)=>projectIds.has(p.id)||!p.archived_at),
     assignments:ownAssignments,
     documents:[],
     punches:full.punches.filter((p:any)=>p.resource_id===user.resourceId),day_entries:full.day_entries.filter((e:any)=>e.resource_id===user.resourceId),
@@ -48,7 +48,7 @@ function scopeData(full:Record<string,any[]>,user:CurrentUser){
 }
 export async function POST(r:Request){return bumpVersion(await handlePost(r))}
 async function handlePost(r:Request){const user=await currentUser(r);if(!user)return out({error:'Nicht angemeldet.'},401);if(r.headers.get('origin')&&r.headers.get('origin')!==new URL(r.url).origin)return out({error:'Anfrage abgelehnt.'},403);try{const b=z.object({action:z.string()}).passthrough().parse(await r.json()),d=db();
-if(managementActions.has(b.action)&&user.accessRole==='monteur')return out({error:'Keine Berechtigung.'},403);
+if(managementActions.has(b.action)&&(user.accessRole==='monteur'||user.accessRole==='buchhaltung'))return out({error:'Keine Berechtigung.'},403);
 if((b.action==='archiveResource'||b.action==='employee'||b.action==='decideVacation')&&user.accessRole!=='planer')return out({error:'Keine Berechtigung.'},403);
 const auditLabel=logged.has(b.action)?await auditTarget(d,b):'';
 if(b.action==='user'||b.action==='deleteUser'){if(user.accessRole!=='planer')return out({error:'Keine Berechtigung.'},403);

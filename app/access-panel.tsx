@@ -11,7 +11,7 @@ export type AppUser = { id: string; email: string; name: string; access_role: st
 export type AuditEntry = { id: string; at: string; actor_name: string; actor_email: string; action: string; target: string };
 type Person = { id: string; name: string; role: string; archived_at?: string | null };
 
-const roles: Record<string, string> = { planer: 'Planer', obermonteur: 'Obermonteur', monteur: 'Monteur' };
+const roles: Record<string, string> = { planer: 'Planer', obermonteur: 'Obermonteur', monteur: 'Monteur', buchhaltung: 'Buchhaltung' };
 const actions: Record<string, string> = {
   user: 'Zugang gespeichert', deleteUser: 'Zugang entfernt', employee: 'Mitarbeiter gespeichert',
   resource: 'Ressource gespeichert', archiveResource: 'Mitarbeiter archiviert', restoreResource: 'Mitarbeiter wiederhergestellt',

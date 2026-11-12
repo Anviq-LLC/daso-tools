@@ -7,7 +7,7 @@ export async function bumpVersion(res:Response):Promise<Response>{
   if(res.ok){const d=db();try{await d.batch([d.prepare('CREATE TABLE IF NOT EXISTS data_version(id INTEGER PRIMARY KEY, v INTEGER NOT NULL)'),d.prepare('INSERT INTO data_version(id,v) VALUES(1,1) ON CONFLICT(id) DO UPDATE SET v=v+1')])}catch(e){console.error(e)}}
   return res;
 }
-export type AccessRole='planer'|'obermonteur'|'monteur';
+export type AccessRole='planer'|'obermonteur'|'monteur'|'buchhaltung';
 export type CurrentUser={id:string;email:string;name:string;accessRole:AccessRole;resourceId:string|null};
 export async function currentUser(r:Request):Promise<CurrentUser|null>{
   const email=r.headers.get('cf-access-authenticated-user-email')?.trim().toLowerCase();
