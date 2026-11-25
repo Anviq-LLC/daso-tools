@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const from = process.env.AUFMASS_LIB || join(import.meta.dirname, '..', '..', 'daso-aufmasstool', 'lib');
+const from = process.env.AUFMASS_LIB || join(import.meta.dirname, '..', '..', 'aufmass', 'lib');
 const to = join(import.meta.dirname, '..', 'src', 'vendor', 'aufmass');
 mkdirSync(to, { recursive: true });
 for (const f of ['types', 'business', 'employees', 'report-crews', 'time-reports', 'ids']) {

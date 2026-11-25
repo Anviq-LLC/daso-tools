@@ -5,7 +5,7 @@ Internal payroll preparation for DaSO Lüftungsbau. It reads hours, travel, meal
 ## Run
 
     pnpm install
-    pnpm sync:aufmass   # refresh the vendored revenue logic from ../daso-aufmasstool
+    pnpm sync:aufmass   # refresh the vendored revenue logic from ../aufmass
     pnpm test           # calculation and import tests
     pnpm run ci          # typecheck, tests, build, browser tests
 
