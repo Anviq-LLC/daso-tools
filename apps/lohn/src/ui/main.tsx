@@ -3,11 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { api } from './api.ts';
 import { MonthPage } from './MonthPage.tsx';
 import { PayrollPage } from './Payroll.tsx';
-import { EmployeesPage, SettingsPage, ToolsPage, AuditPage } from './Pages.tsx';
+import { AccessPage, EmployeesPage, SettingsPage, ToolsPage, AuditPage } from './Pages.tsx';
 import logo from './logo.png';
 import './style.css';
 
-const TABS = [['month', 'Monat'], ['payroll', 'Lohnabrechnung'], ['employees', 'Mitarbeiter'], ['tools', 'Werkzeug und Extern'], ['settings', 'Einstellungen'], ['audit', 'Protokoll']] as const;
+const TABS = [['month', 'Monat'], ['payroll', 'Lohnabrechnung'], ['employees', 'Mitarbeiter'], ['tools', 'Werkzeug und Extern'], ['settings', 'Einstellungen'], ['audit', 'Protokoll'], ['access', 'Zugänge']] as const;
 type Tab = (typeof TABS)[number][0];
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
       <header className="bar">
         <a className="brand" href="/" aria-label="DaSO Lohntool Startseite"><img src={logo} alt="DaSo Lüftungsbau" /><div><strong>DaSo Lüftungsbau</strong><span>Lohnvorbereitung</span></div></a>
         <nav aria-label="Bereiche">
-          {TABS.map(([k, label]) => (
+          {TABS.filter(([k]) => k !== 'access' || me.role === 'gf').map(([k, label]) => (
             <button key={k} className={tab === k ? 'tab on' : 'tab'} aria-current={tab === k} onClick={() => setTab(k)}>{label}</button>
           ))}
         </nav>
@@ -34,8 +34,9 @@ function App() {
         {tab === 'payroll' && <PayrollPage month={month} setMonth={setMonth} />}
         {tab === 'employees' && <EmployeesPage month={month} />}
         {tab === 'tools' && <ToolsPage month={month} setMonth={setMonth} />}
-        {tab === 'settings' && <SettingsPage role={me.role} />}
+        {tab === 'settings' && <SettingsPage />}
         {tab === 'audit' && <AuditPage />}
+        {tab === 'access' && me.role === 'gf' && <AccessPage me={me.email} />}
       </main>
     </>
   );

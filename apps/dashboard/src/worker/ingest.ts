@@ -60,7 +60,7 @@ export async function refreshMonth(env: Env, month: string, reason = 'Neu berech
     db.prepare('DELETE FROM fact_hours WHERE month = ?').bind(month), db.prepare('DELETE FROM fact_absence WHERE month = ?').bind(month),
     db.prepare('DELETE FROM ingest_warning WHERE month = ?').bind(month),
     ...x.emp.map((r) => db.prepare('INSERT INTO fact_emp VALUES (?,?,?,?,?,?,?,?,?,?,?)').bind(month, r.day, r.resourceId, r.name, r.projectId, r.label, r.reportId, r.customer, r.employee, r.binding ? 1 : 0, r.estimated ? 1 : 0)),
-    ...x.sub.map((r) => db.prepare('INSERT INTO fact_sub VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(month, r.day, r.projectId, r.label, r.firm, r.team, r.reportId, r.customer, r.cost, r.heads, r.minutes, r.binding ? 1 : 0, r.estimated ? 1 : 0)),
+    ...x.sub.map((r) => db.prepare('INSERT INTO fact_sub VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(month, r.day, r.projectId, r.label, r.firm, r.team, r.reportId, r.customer, r.cost, r.heads, r.minutes, r.binding ? 1 : 0, r.estimated ? 1 : 0, r.basis ?? 'performance')),
     ...hours.map((h) => db.prepare('INSERT INTO fact_hours VALUES (?,?,?,?,?,?,?)').bind(month, h.day, h.resourceId, h.projectId, h.minutes, h.travel ? 1 : 0, h.open ? 1 : 0)),
     ...absence.map((a) => db.prepare('INSERT INTO fact_absence VALUES (?,?,?,?,?)').bind(month, a.day, a.resourceId, a.kind, a.review ? 1 : 0)),
     ...x.warnings.map((w) => db.prepare('INSERT INTO ingest_warning VALUES (?,?)').bind(month, w)),

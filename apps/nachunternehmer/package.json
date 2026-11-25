@@ -1,0 +1,13 @@
+{
+  "name": "daso-nachunternehmer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "dev": "wrangler dev --local --var DEV_IDENTITY:1",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": { "wrangler": "^4.159.0" }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "daso-nachunternehmer",
+  "account_id": "de81ba1a2e7bae6a87821b398353b8dd",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-05-15",
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "assets": { "directory": "dist", "binding": "ASSETS", "run_worker_first": true },
+  "vars": {
+    "CF_ACCESS_TEAM_DOMAIN": "dasoluft.cloudflareaccess.com",
+    "NU_ALLOWED_EMAILS": "enriquevoss@gmail.com,daso@dasoluft.com",
+    "CF_ACCESS_AUD":"dfad2cfa91680d5746bc80f323f87142193f238f30520ce520f1a9c785764c44"
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "daso-nachunternehmer", "database_id": "086b2409-9985-4d43-9ce7-18867308ebd4", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "daso-nachunternehmer-files" }]
+}

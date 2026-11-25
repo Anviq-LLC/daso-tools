@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { api, money, toCents } from '../api.ts';
 import type { Me } from '../types.ts';
+import type { AccountingReport } from '../../calc/accounting-pdf.ts';
+import { CostOverview } from './CostOverview.tsx';
 
 type CostType = { id: string; name: string; category: string; monthly_cents: number; valid_from: string; valid_to: string | null; doc_url: string; note: string };
 type Entry = { id: string; day: string; kind: string; project_id: string; firm: string; subcategory: string; cents: number; doc_url: string; note: string };
 const KIND = { sub: 'Sub-Kosten', alex: 'Alex (ext. Bauleitung)', other: 'Sonstiges' } as const;
 
-export function Costs({ me, month, onChange }: { me: Me; month: string; onChange: () => void }) {
+export function Costs({ me, month, onChange, reports, onAccounting }: { me: Me; month: string; onChange: () => void; reports: AccountingReport[]; onAccounting: () => void }) {
   const [types, setTypes] = useState<CostType[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [err, setErr] = useState('');
@@ -36,6 +38,7 @@ export function Costs({ me, month, onChange }: { me: Me; month: string; onChange
   return (
     <>
       {err && <div className="warn err">{err}</div>}
+      <CostOverview year={month.slice(0, 4)} reports={reports} onAccounting={onAccounting} />
       <section className="card">
         <h2>Monatliche Kostenarten</h2>
         <div className="scroll"><table><thead><tr><th>Name</th><th>Kategorie</th><th>Monatlich</th><th>Gültig ab</th><th>bis</th><th>Beleg</th><th>Notiz</th></tr></thead><tbody>

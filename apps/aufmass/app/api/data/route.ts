@@ -20,7 +20,16 @@ function date(v:unknown){const s=text(v,10);need(/^\d{4}-\d{2}-\d{2}$/.test(s)&&
 function emails(v:unknown){const s=text(v,1000);need(!/[\r\n]/.test(s)&&s.split(/[;,]/).filter(x=>x.trim()).every(x=>/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(x.trim())),'Bitte E-Mail-Adressen prüfen (mehrere mit Komma trennen).');return s;}
 function integer(v:unknown,max=1e12){const n=Number(v);need(typeof v==='number'&&Number.isSafeInteger(n)&&n>=0&&n<=max,'Ungültiger Geldbetrag.');return n;}
 function calendarWeek(v:unknown){const s=text(v,8);need(/^\d{4}-W\d{2}$/.test(s)&&weekOf(weekStart(s))===s,'Ungültige Kalenderwoche.');return s;}
-export async function GET(request:Request){try{await actor(request);await syncPlanProjects().catch(()=>{});return Response.json(await readData(new URL(request.url).searchParams.get('project')||undefined),{headers:{'Cache-Control':'no-store'}});}catch(e){return Response.json({error:e instanceof Error?e.message:'Daten konnten nicht geladen werden.'},{status:400});}}
+async function purgeStaleDrafts(projectId:string,user:string){
+ const data=await readData(projectId),cutoff=new Date(Date.now()-864e5).toISOString(),stale=new Set(data.reports.filter(r=>r.state==='draft'&&r.updatedAt<cutoff).map(r=>r.id));
+ for(const r of data.reports)if(r.parentReportId&&!stale.has(r.id))stale.delete(r.parentReportId);
+ if(!stale.size)return;
+ const now=new Date().toISOString(),puts:{kind:string;value:{id:string;[key:string]:unknown}}[]=[],deletes:string[]=[],keys:string[]=[];
+ for(const r of data.reports.filter(x=>stale.has(x.id))){const files=data.files.filter(f=>f.reportId===r.id);puts.push({kind:'deletedreport',value:{id:'deleted:'+r.id,report:r,files,reason:'Entwurf nach 24 Stunden automatisch gelöscht',user,at:now}});deletes.push(r.id,...files.map(f=>f.id));keys.push(...files.flatMap(f=>[f.key,f.original?.key]).filter((k):k is string=>!!k));}
+ await commit(projectId,'purgeDrafts',user,puts,deletes,`${stale.size} Entwürfe nach 24 Stunden gelöscht`);
+ await Promise.all(keys.map(k=>bucket().delete(k).catch(()=>{})));
+}
+export async function GET(request:Request){try{const user=await actor(request);await syncPlanProjects().catch(()=>{});const project=new URL(request.url).searchParams.get('project')||undefined;if(project)await purgeStaleDrafts(project,user).catch(()=>{});return Response.json(await readData(project),{headers:{'Cache-Control':'no-store'}});}catch(e){return Response.json({error:e instanceof Error?e.message:'Daten konnten nicht geladen werden.'},{status:400});}}
 export async function POST(request:Request){try{
  const user=await actor(request);need(Number(request.headers.get('content-length')||0)<3_000_000,'Import ist zu groß. Bitte aufteilen.');const b=await request.json() as {action:string;projectId:string;project:Project;positions:Position[];report:Report;id:string;updatedAt:string;reason:string;note:string;week:string;amount:number;number:string;date:string;closureId:string;reference:string;reportIds:string[];versions:Record<string,string>;area:string;fileId:string;to:string;cc:string;subject:string;body:string;includeSummary:boolean};const action=text(b.action,50),now=new Date().toISOString();let projectId=text(b.projectId,100);
  if(action==='saveProject'&&!projectId){
@@ -163,7 +172,7 @@ async function syncPlanProjects(){
   for(const a of mine){
    const name=a.name.trim(),workers:TeamMember[]=[name,...(a.max>=2?[name+' 2']:[])].map(n=>({name:n,role:'fitter',hourlyRate:null})),t=teams.find(x=>x.planId===a.contractorId)||teams.find(x=>!x.planId&&x.company.trim().toLowerCase()===name.toLowerCase());
    if(t){t.planId=a.contractorId;t.company=name;if(!teamMembers(t).some(m=>m.name))t.members=workers;}
-   else if(name){let n=1;while(codes.has('T'+n))n++;codes.add('T'+n);added.push({code:'T'+n,company:name,planId:a.contractorId,members:workers});}
+   else if(name){let n=1;while([...codes].some(c=>c.match(/^T(\d+)/)?.[1]===String(n)))n++;const letters=name.replace(/[^\p{L}]/gu,'').toUpperCase(),tags=new Set([...codes].map(c=>c.replace(/^T\d+/,'')));let len=Math.min(1,letters.length);while(len<letters.length&&tags.has(letters.slice(0,len)))len++;const code='T'+n+letters.slice(0,len);codes.add(code);added.push({code,company:name,planId:a.contractorId,members:workers});}
   }
   const next=[...teams,...added];
   if(JSON.stringify(next)!==JSON.stringify(p.teams||[])){try{await commit(p.id,'Nachunternehmer aus Montageplanung','Montageplanung',[{kind:'project',value:{...p,teams:next,updatedAt:new Date().toISOString()} as Project}],[],added.map(t=>t.company).join(', '));}catch{/* retried on the next load */}}

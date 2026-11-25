@@ -1,7 +1,7 @@
 // Turns Aufmass records into revenue facts per service day. Revenue is counted once per report slice;
 // the 90 percent employee value is only a second view of the same customer revenue, never added on top.
 import { crewReports, employeeShares, normalizeFinancialData, reportCost, reportTotals } from '../vendor/aufmass/business.ts';
-import { isTimeReport, reportDays, timePricingComplete } from '../vendor/aufmass/time-reports.ts';
+import { isTimeReport, reportDays, timePricingComplete, timeWorkers, workMinutes } from '../vendor/aufmass/time-reports.ts';
 import type { Data, Line, Project, Report } from '../vendor/aufmass/types.ts';
 import { allocate, employeeDayRevenue, isBinding, serviceDays, type ApprovalMode } from './rules.ts';
 
@@ -13,6 +13,7 @@ export type EmpFact = {
 export type SubFact = {
   day: string; projectId: string; label: string; firm: string; team: string; reportId: string; customer: number;
   cost: number | null; heads: number | null; minutes: number | null; binding: boolean; estimated: boolean;
+  basis?: 'performance' | 'hourly';
 };
 export type Extract = { emp: EmpFact[]; sub: SubFact[]; warnings: string[] };
 
@@ -62,7 +63,7 @@ export function resolveFirm(raw: string, contractors: string[] = [], aliases: Re
 }
 
 export function extract(
-  data: Data, month: string, opts: { mode?: ApprovalMode; aliases?: Record<string, string>; contractors?: string[] } = {},
+  data: Data, month: string | null, opts: { mode?: ApprovalMode; aliases?: Record<string, string>; contractors?: string[] } = {},
 ): Extract {
   const out: Extract = { emp: [], sub: [], warnings: [] };
   const mode = opts.mode ?? 'saved';
@@ -92,7 +93,7 @@ export function extract(
 
     for (const dr of dayReports(report)) {
       const days = isTimeReport(report) ? [(dr.date || '').slice(0, 10)] : serviceDays((dr.date || '').slice(0, 10), (dr.endDate || dr.date || '').slice(0, 10));
-      if (!days.some((d) => d.startsWith(month))) continue;
+      if (month!==null&&!days.some(d=>d.startsWith(month))) continue;
       const estimated = days.length > 1;
 
       for (const slice of crewReports(dr, factor)) {
@@ -100,18 +101,26 @@ export function extract(
         const work = slice.teamWork;
         if (work) {
           const rate = work.hourlyRate ?? 0;
-          const hoursOn = (d: string) => work.workers.reduce((s, w) => s + (days.length > 1 ? (w.dailyHours?.[d] ?? 0) : (w.hours ?? w.dailyHours?.[d] ?? 0)), 0);
+          const sheet=isTimeReport(slice)?slice.timeSheet:undefined;
+          const contractorIds=new Set(sheet?timeWorkers(slice).map(worker=>worker.id):[]);
+          const timeEntries=(day:string)=>sheet?.entries.filter(entry=>entry.date===day&&contractorIds.has(entry.workerId))??[];
+          const hoursOn = (d: string) => sheet
+            ? timeEntries(d).reduce((sum,entry)=>sum+(workMinutes(entry)??0),0)/60
+            : work.workers.reduce((s, w) => s + (days.length > 1 ? (w.dailyHours?.[d] ?? 0) : (w.hours ?? w.dailyHours?.[d] ?? 0)), 0);
           const weights = days.length > 1 ? days.map((d) => hoursOn(d) * rate) : [1];
           const cost = reportCost(slice);
           const customer = allocate(totals.customer, weights);
           const costs = cost === null ? null : allocate(cost, weights);
           days.forEach((d, i) => {
-            if (!d.startsWith(month)) return;
-            const heads = work.workers.filter((w) => (days.length > 1 ? (w.dailyHours?.[d] ?? 0) : (w.hours ?? 1)) > 0).length;
+            if (month!==null&&!d.startsWith(month)) return;
+            const heads = sheet
+              ? new Set(timeEntries(d).filter(entry=>(workMinutes(entry)??0)>0).map(entry=>entry.workerId)).size
+              : work.workers.filter((w) => (days.length > 1 ? (w.dailyHours?.[d] ?? 0) : (w.hours ?? 1)) > 0).length;
             out.sub.push({
               day: d, projectId, label, firm: firmName(work.company), team: work.code, reportId: report.id,
               customer: customer[i], cost: costs ? costs[i] : null, heads: heads || null,
               minutes: Math.round(hoursOn(d) * 60) || null, binding, estimated,
+              basis:report.kind==='timesheet'&&!report.parentReportId?'hourly':'performance',
             });
           });
           continue;
@@ -126,7 +135,7 @@ export function extract(
           if (!rid) unlinked.add(s.name);
           const emp = employeeDayRevenue(s.employee, days.length), cus = employeeDayRevenue(customer[i], days.length);
           days.forEach((d, k) => {
-            if (!d.startsWith(month)) return;
+            if (month!==null&&!d.startsWith(month)) return;
             out.emp.push({
               day: d, resourceId: rid || `aufmass:${s.employeeId}`, name: s.name, code: s.code, projectId, label, reportId: report.id,
               customer: cus[k], employee: emp[k], binding, estimated,

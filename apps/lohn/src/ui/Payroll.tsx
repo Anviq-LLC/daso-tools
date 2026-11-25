@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, eur, fromCents, toCents, type MonthView } from './api.ts';
 import { GROSS, MONEY, KM, DAYS, brutto, value, type Inputs } from '../calc/payroll.ts';
 
@@ -11,9 +11,11 @@ export function PayrollPage({ month, setMonth }: { month: string; setMonth: (m: 
   const [view, setView] = useState<MonthView | null>(null);
   const [inputs, setInputs] = useState<All>({});
   const [error, setError] = useState('');
+  const seq = useRef(0);
   const load = useCallback(async () => {
-    try { setError(''); const [v, i] = await Promise.all([api<MonthView>(`/api/months/${month}`), api<All>(`/api/payroll/${month}`)]); setView(v); setInputs(i); }
-    catch (e) { setError((e as Error).message); setView(null); }
+    const n = ++seq.current;
+    try { setError(''); const [v, i] = await Promise.all([api<MonthView>(`/api/months/${month}`), api<All>(`/api/payroll/${month}`)]); if (n === seq.current) { setView(v); setInputs(i); } }
+    catch (e) { if (n === seq.current) { setError((e as Error).message); setView(null); } }
   }, [month]);
   useEffect(() => { load(); }, [load]);
 

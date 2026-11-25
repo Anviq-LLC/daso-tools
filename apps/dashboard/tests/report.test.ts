@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildMonth, type MonthInput } from '../src/calc/report.ts';
+import { buildMonth, employeeYearRanking, projectYearRanking, type MonthInput } from '../src/calc/report.ts';
 import { DEFAULT_TARGET } from '../src/calc/rules.ts';
-import { forecastMonth, forecastYear } from '../src/calc/forecast.ts';
+import { forecastMonth, forecastYear, isWinterClosure } from '../src/calc/forecast.ts';
 import { holidaysRP } from '../src/calc/holidays.ts';
 
 const cfg = { target: DEFAULT_TARGET, employerPct: 0, defaultHourly: 0, modelSaturdayBonus: false };
@@ -12,6 +12,36 @@ const base = (o: Partial<MonthInput>): MonthInput => ({
 });
 const empRow = (day: string, project: string, customer: number, binding = true) =>
   ({ day, resourceId: 'r1', name: 'A', projectId: project, label: project, reportId: 'x' + day, customer, employee: Math.round(customer * 0.9), binding, estimated: false });
+
+test('Mitarbeiter-Ranking verbindet den Vergleichsmonat mit der Rangfolge nach Jahresumsatz',()=>{
+  const reports=[
+    buildMonth(base({month:'2025-10',emp:[empRow('2025-10-15','p',40000)]})),
+    buildMonth(base({month:'2025-11',emp:[empRow('2025-11-04','p',10000),
+      {...empRow('2025-11-04','p',30000),resourceId:'r2',name:'B'}]})),
+  ];
+  const ranking=employeeYearRanking(reports,2025,'2026-11-19');
+  assert.equal(ranking.employeeRankingMonth,'2025-11');
+  assert.deepEqual(ranking.employees.map(row=>[row.name,row.monthlyReal,row.real]),[
+    ['A',9000,45000],['B',27000,27000],
+  ]);
+});
+
+test('Projektranking zeigt nur echte Jahresgewinne bzw. Jahresverluste mit vollständigen Sub-Kosten',()=>{
+  const project=(id:string,revenue:number,cost:number|null)=>({
+    day:'2026-03-02',projectId:id,label:id,firm:'NU',team:'A',reportId:id,customer:revenue,
+    cost,heads:2,minutes:480,binding:true,estimated:false,
+  });
+  const march=buildMonth(base({sub:[
+    ...Array.from({length:6},(_,index)=>project('gewinn-'+index,2000+index,1000)),
+    project('verlust',500,1800),project('ausgeglichen',1000,1000),
+    project('unvollständig',9000,null),project('wechsel',1200,1000),
+  ]}));
+  const april=buildMonth(base({month:'2026-04',sub:[{...project('wechsel',0,400),day:'2026-04-02'}]}));
+  const ranking=projectYearRanking([march,april]);
+  assert.deepEqual(ranking.projectsTop.map(row=>row.id),['gewinn-5','gewinn-4','gewinn-3','gewinn-2','gewinn-1']);
+  assert.deepEqual(ranking.projectsFlop.map(row=>[row.id,row.before]),[['verlust',-1300],['wechsel',-200]]);
+  assert.deepEqual(projectYearRanking([buildMonth(base({sub:[project('gewinn',1000,500)]}))]).projectsFlop,[]);
+});
 
 test('two excused days give 727,27 fictive credit and no revenue', () => {
   const r = buildMonth(base({ absence: [
@@ -76,6 +106,25 @@ test('forecast projects the average productive weekday, saturdays separately', (
   assert.equal(f.remainingWeekdays, 12);
   assert.equal(f.remainingSaturdays, 3);
   assert.equal(f.forecast, 400 + 200 * 12 + 150);
+});
+
+test('winter closure covers two ISO weeks starting at KW 52 and preserves booked revenue', () => {
+  assert.equal(isWinterClosure('2025-12-22'), true);
+  assert.equal(isWinterClosure('2026-01-04'), true);
+  assert.equal(isWinterClosure('2026-01-05'), false);
+  assert.equal(isWinterClosure('2026-12-20'), false);
+  assert.equal(isWinterClosure('2026-12-21'), true);
+  assert.equal(isWinterClosure('2027-01-03'), true);
+  assert.equal(isWinterClosure('2027-01-04'), false);
+
+  const december = {month:'2026-12', revenueByDay:{'2026-12-01':100,'2026-12-22':300}, holidays:new Set<string>(), saturdayCents:50};
+  const before = forecastMonth({...december,asOf:'2026-12-18'});
+  assert.equal(before.remainingWeekdays,0);
+  assert.equal(before.remainingSaturdays,1);
+  assert.equal(before.forecast,150);
+  const during = forecastMonth({...december,asOf:'2026-12-22'});
+  assert.equal(during.ist,400);
+  assert.equal(during.forecast,400);
 });
 
 test('year forecast keeps actual and forecast apart', () => {

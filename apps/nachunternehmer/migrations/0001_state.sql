@@ -1,0 +1,1 @@
+CREATE TABLE state(id TEXT PRIMARY KEY, data TEXT NOT NULL, token TEXT NOT NULL, updated_at TEXT NOT NULL, updated_by TEXT NOT NULL);

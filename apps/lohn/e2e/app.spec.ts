@@ -70,6 +70,7 @@ test.describe('app', () => {
     await expect(detail).toContainText('Umsatzbonus');
     await expect(detail).toContainText('Werkzeugrate');
     await expect(detail.getByLabel('Monatsansicht Ben Beispiel')).toContainText('Summe');
+    await expect(detail.getByLabel('Monatsansicht Ben Beispiel').locator('thead th').first()).toHaveCSS('position', 'static');
     await detail.getByLabel('Bezeichnung').fill('Rückbuchung Januar');
     await detail.getByLabel('Betrag').fill('-50,00');
     await detail.getByRole('button', { name: 'Erfassen' }).click();
@@ -174,4 +175,45 @@ test('payroll sheet shows computed brutto and keeps typed values', async ({ page
   await page.getByLabel('Grundgehalt Ben Beispiel').blur();
   await expect(page.getByTestId('payroll-table').getByRole('row', { name: /Ben Beispiel/ })).toContainText('6.850,00');
   await shot(page, '08-payroll');
+});
+
+test('Zugänge is its own tab: add, change and remove an access', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Zugänge' }).click();
+  await page.getByLabel('E-Mail').fill('neu@example.test');
+  await page.getByLabel('Name').fill('Neue Person');
+  await page.getByRole('button', { name: 'Zugang setzen' }).click();
+  const row = page.getByRole('row', { name: /neu@example.test/ });
+  await expect(row).toContainText('Neue Person');
+  await row.getByLabel('Rolle neu@example.test').selectOption('gf');
+  await expect(row.getByLabel('Rolle neu@example.test')).toHaveValue('gf');
+  await shot(page, '09-access');
+  await row.getByRole('button', { name: 'Entfernen' }).click();
+  await expect(page.getByRole('row', { name: /neu@example.test/ })).toHaveCount(0);
+});
+
+test('Buchhaltung does not see the Zugänge tab', async ({ browser }) => {
+  const ctx = await browser.newContext({ baseURL: 'http://127.0.0.1:8788', locale: 'de-DE', extraHTTPHeaders: header({ email: 'buero@example.test' }) });
+  const page = await ctx.newPage();
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Monat', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Zugänge' })).toHaveCount(0);
+  await ctx.close();
+});
+
+test('every tab fits a phone and a laptop without sideways page scroll', async ({ browser }) => {
+  for (const [name, viewport] of [['phone', { width: 375, height: 800 }], ['laptop', { width: 1280, height: 720 }]] as const) {
+    const ctx = await browser.newContext({ baseURL: 'http://127.0.0.1:8788', locale: 'de-DE', extraHTTPHeaders: header(), viewport });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.getByLabel('Monat').fill('2027-02');
+    for (const tab of ['Monat', 'Lohnabrechnung', 'Mitarbeiter', 'Werkzeug und Extern', 'Einstellungen', 'Protokoll', 'Zugänge']) {
+      await page.getByRole('button', { name: tab, exact: true }).click();
+      await expect(page.getByRole('heading').first().or(page.getByTestId('month-table'))).toBeVisible();
+      expect(await overflow(page), `${name} ${tab}`).toBeLessThanOrEqual(0);
+      await expect(page.locator('table, fieldset').first()).toBeVisible();
+      await shot(page, `10-${name}-${tab.replace(/\W+/g, '-')}`);
+    }
+    await ctx.close();
+  }
 });

@@ -1,6 +1,7 @@
 import test from 'node:test';
+import { ocrTextItems } from '../src/calc/ocr-layout.ts';
 import assert from 'node:assert/strict';
-import { bucketOf, DEFAULT_MAPPING, linesFromRows, linesFromText, parseAmount, suggest, summarize } from '../src/calc/bwa.ts';
+import { bucketOf, DEFAULT_MAPPING, linesFromRows, linesFromText, parseAmount, pdfLines, suggest, summarize } from '../src/calc/bwa.ts';
 
 test('german amounts', () => {
   assert.equal(parseAmount('1.234,56'), 123_456);
@@ -50,4 +51,36 @@ test('summary uses magnitudes so a SuSa credit counts as positive revenue', () =
   assert.equal(s.revenue, 9_500_000);
   assert.equal(s.costs, 3_000_000);
   assert.equal(s.operating, 6_500_000);
+});
+
+test('parsed BWA keeps top-level rows and its own signed result', () => {
+  const row = (label: string, month: number | null) => ({ label, month, ytd: null, prior: null });
+  const lines = pdfLines({
+    kind: 'bwa', period: '2026-10', revenue: 1_281_170, operating: -215_965, beforeTax: -213_957, result: -213_957,
+    rows: [row('Umsatzerlöse', 1_281_170), row('Erlöse aus Leistungen nach § 13b', 1_281_170), row('Wareneinsatz', 585_868), row('Personalkosten', 558_184),
+      row('Gehälter', 164_739), row('Versicherungen/Beiträge', 15_231), row('Versicherungen', 14_281), row('Betriebsergebnis', -215_965), row('Ergebnis vor Steuern', -213_957)],
+  });
+  assert.deepEqual(lines.map((l) => l.label), ['Umsatzerlöse', 'Wareneinsatz', 'Personalkosten', 'Versicherungen/Beiträge', 'Betriebsergebnis', 'Ergebnis vor Steuern']);
+  const s = summarize(lines.map((l) => ({ ...l, bucket: l.bucket! })));
+  assert.equal(s.revenue, 1_281_170);
+  assert.equal(s.operating, -215_965);
+  assert.equal(s.beforeTax, -213_957);
+});
+test('parsed SuSa gives net movement and skips accounts without one', () => {
+  const acc = { opening: null, ytdDebit: null, ytdCredit: null, balance: null };
+  const lines = pdfLines({ kind: 'susa', period: '2026-08', rows: [
+    { account: '8337', label: 'Erlöse', debit: 0, credit: 23_113_192, ...acc },
+    { account: '4120', label: 'Gehälter', debit: 500_000, credit: 0, ...acc },
+    { account: '1200', label: 'Bank', debit: 100, credit: 40, ...acc },
+    { account: '1210', label: 'Bank 1', debit: 0, credit: 0, ...acc },
+  ] });
+  assert.deepEqual(lines.map((l) => [l.account, l.cents, l.bucket]), [['8337', -23_113_192, ''], ['4120', 500_000, 'sonstige_kosten'], ['1200', 60, 'ignorieren']]);
+});
+
+test('OCR words in one line become cells split by wide gaps', () => {
+  const word = (text: string, left: number, top: number) => ['5', 1, 1, 1, 1, 1, left, top, 40, 10, 90, text].join('\t');
+  const tsv = ['5\t1\t1\t1\t1\t0\t0\t0\t0\t0\t-1\t', word('Ergebnis', 10, 100), word('vor', 52, 100), word('Steuern', 94, 100), word('-1.234,56', 400, 100)].join('\n');
+  const items = ocrTextItems(tsv, 1000, 1);
+  assert.deepEqual(items.map((i) => i.str), ['Ergebnis vor Steuern', '-1.234,56']);
+  assert.equal(items[1].transform[4], 400);
 });

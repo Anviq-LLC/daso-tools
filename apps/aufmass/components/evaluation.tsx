@@ -4,7 +4,7 @@ import {Loader2} from 'lucide-react';
 import {NativeSelect} from '@/components/ui/native-select';
 import {Input} from '@/components/ui/input';
 import {DailyRevenueOverview} from '@/components/daily-revenue-overview';
-import {dateLabel,money,qty2,reportDateRange,reportTotals,today} from '@/lib/business';
+import {crewReports,dateLabel,employeeTurnover,money,qty2,reportDateRange,reportTotals,today} from '@/lib/business';
 import {reportCrews} from '@/lib/report-crews';
 import {projectPricedReport,reportKind,reportLabel} from '@/lib/time-reports';
 import type {Data,Project,Report} from '@/lib/types';
@@ -19,6 +19,14 @@ function options(data:Data,mode:Mode){
  for(const r of data.reports)for(const c of reportCrews(r))if(c.teamWork?.company.trim())names.add(c.teamWork.company.trim());
  return[...names].sort().map(name=>({id:name,label:name}));
 }
+
+// Revenue in employee value (project factor). Employee and contractor views only count their own share of a report.
+function amount(r:Report,mode:Mode,id:string,factor:number){
+ if(mode==='project')return reportTotals([r],factor).employee;
+ if(mode==='employee')return employeeTurnover([r],factor,true).find(m=>m.employeeId===id)?.employee||0;
+ return reportTotals(ownCrews(r,id,factor),factor).employee;
+}
+const ownCrews=(r:Report,id:string,factor:number)=>crewReports(r,factor).filter(c=>c.teamWork?.company.trim()===id);
 
 function matches(r:Report,mode:Mode,id:string){
  if(mode==='project')return r.projectId===id;
@@ -39,9 +47,9 @@ export function Evaluation(){
  },[data,mode,selected,from,to]);
  if(!data)return error?<div className="message error">{error}</div>:<div className="loading"><Loader2 className="spin"/>Daten werden geladen …</div>;
  const projects=new Map<string,Project>(data.projects.map(p=>[p.id,p])),ready=picked.filter(r=>r.state==='ready'),drafts=picked.length-ready.length;
- const perDay=new Map<string,number>();for(const r of ready)perDay.set(r.date,(perDay.get(r.date)||0)+reportTotals([r],projects.get(r.projectId)!.factor).customer);
+ const perDay=new Map<string,number>();for(const r of ready)perDay.set(r.date,(perDay.get(r.date)||0)+amount(r,mode,selected,projects.get(r.projectId)!.factor));
  const days=[...perDay.entries()].sort(([a],[b])=>a.localeCompare(b)),max=Math.max(1,...days.map(([,v])=>v));
- const total=ready.reduce((sum,r)=>sum+reportTotals([r],projects.get(r.projectId)!.factor).customer,0);
+ const total=[...perDay.values()].reduce((a,b)=>a+b,0);
  const groups=[...new Set(ready.map(r=>r.projectId))].map(pid=>({project:projects.get(pid)!,reports:ready.filter(r=>r.projectId===pid)}));
  return <div className="stack">
   <div className="filter-bar evaluation-filter">
@@ -53,14 +61,14 @@ export function Evaluation(){
   {!choices.length?<div className="empty"><p>Keine Einträge vorhanden.</p></div>:<>
    <div className="stats">
     <div className="stat"><div><span>Aufmaße im Zeitraum</span><strong>{ready.length}</strong><small>{dateLabel(from)} – {dateLabel(to)}{drafts>0?` · ${drafts} Entwürfe nicht gezählt`:''}</small></div></div>
-    <div className="stat"><div><span>Umsatz (Kunde)</span><strong>{money(total)}</strong><small>{mode==='project'?'Alle Berichte des Projekts':'Alle Berichte, an denen beteiligt'}</small></div></div>
+    <div className="stat"><div><span>Umsatz</span><strong>{money(total)}</strong><small>{mode==='project'?'Alle Berichte des Projekts':'Alle Berichte, an denen beteiligt'}</small></div></div>
     <div className="stat"><div><span>Arbeitstage</span><strong>{days.length}</strong><small>Tage mit Berichten</small></div></div>
    </div>
    {days.length>0&&<section className="panel"><div className="panel-heading"><h2>Umsatz pro Tag</h2></div><div className="padding evaluation-bars" role="img" aria-label="Umsatz pro Tag">{days.map(([day,value])=><div key={day} className="evaluation-bar"><span>{dateLabel(day)}</span><div><i style={{width:Math.max(2,value/max*100)+'%'}}/></div><b>{money(value)}</b></div>)}</div></section>}
    {groups.map(g=><div key={g.project.id} className="stack"><h3 className="evaluation-project">{g.project.number&&g.project.number!=='ohne Nummer'?g.project.number+' · ':''}{g.project.name}</h3>
-    <DailyRevenueOverview reports={g.reports} project={g.project} initialView={mode==='employee'?'employees':'teams'}/>
-    <section className="panel"><div className="panel-heading"><h2>Aufmaße zur Kontrolle</h2></div><div className="padding">{g.reports.map(r=><details key={r.id} className="evaluation-report"><summary>{reportLabel({kind:reportKind(r)})} · {reportDateRange(r)} · {r.team||'ohne Besetzung'} · {money(reportTotals([r],g.project.factor).customer)}</summary>
-     <div className="table-scroll"><table><thead><tr><th>Pos.</th><th>Bezeichnung</th><th className="numeric">Menge</th><th>EH</th><th className="numeric">Betrag</th></tr></thead><tbody>{r.lines.map(l=><tr key={l.id}><td>{l.number}</td><td>{l.description}{l.remark&&<small>{l.remark}</small>}</td><td className="numeric">{qty2(l.quantity)}</td><td>{l.unit}</td><td className="numeric">{money(Math.round(l.quantity*l.price))}</td></tr>)}</tbody></table></div>
+    <DailyRevenueOverview reports={mode==='contractor'?g.reports.flatMap(r=>ownCrews(r,selected,g.project.factor)):g.reports} project={g.project} initialView={mode==='employee'?'employees':'teams'} onlyEmployee={mode==='employee'?selected:undefined}/>
+    <section className="panel"><div className="panel-heading"><h2>Aufmaße zur Kontrolle</h2></div><div className="padding">{g.reports.map(r=><details key={r.id} className="evaluation-report"><summary>{reportLabel({kind:reportKind(r)})} · {reportDateRange(r)} · {r.team||'ohne Besetzung'} · {money(amount(r,mode,selected,g.project.factor))}</summary>
+     <div className="table-scroll"><table><thead><tr><th>Pos.</th><th>Bezeichnung</th><th className="numeric">Menge</th><th>EH</th><th className="numeric">Betrag</th></tr></thead><tbody>{r.lines.map(l=><tr key={l.id}><td>{l.number}</td><td>{l.description}{l.remark&&<small>{l.remark}</small>}</td><td className="numeric">{qty2(l.quantity)}</td><td>{l.unit}</td><td className="numeric">{money(Math.round(l.quantity*(l.employeePrice??l.price)))}</td></tr>)}</tbody></table></div>
      {r.note&&<p className="muted">{r.note}</p>}</details>)}</div></section></div>)}
    {!ready.length&&<div className="empty"><p>Im gewählten Zeitraum gibt es keine Aufmaße.</p></div>}
   </>}

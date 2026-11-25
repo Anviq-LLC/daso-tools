@@ -207,6 +207,14 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     await log(env, who, 'Lohnabrechnung', `${mo} ${rid} ${b.key}`);
     return reply({ ok: true });
   }
+  if ((m = p.match(/^\/api\/roles\/(.+)$/)) && method === 'DELETE') {
+    if (who.role !== 'gf') throw new HttpError(403, 'Nur die Geschäftsführung verwaltet Zugänge.');
+    const email = decodeURIComponent(m[1]).toLowerCase();
+    if (email === who.email) throw new HttpError(409, 'Der eigene Zugang kann nicht entfernt werden.');
+    await env.DB.prepare('DELETE FROM roles WHERE email = ?').bind(email).run();
+    await log(env, who, 'Zugang entfernt', email);
+    return reply({ ok: true });
+  }
   if (p === '/api/roles') {
     if (who.role !== 'gf') throw new HttpError(403, 'Nur die Geschäftsführung verwaltet Zugänge.');
     if (method === 'GET') return reply((await env.DB.prepare('SELECT email, role, name FROM roles ORDER BY email').all()).results);

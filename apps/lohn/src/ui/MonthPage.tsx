@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { api, eur, hours, toCents, type MonthView } from './api.ts';
 import { LABELS, sortCodes } from '../calc/labels.ts';
 
@@ -14,9 +14,13 @@ export function MonthPage({ month, setMonth, role }: { month: string; setMonth: 
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
 
+  const seq = useRef(0);
   const load = useCallback(async () => {
+    const n = ++seq.current;
     setBusy(true); setError('');
-    try { setView(await api<MonthView>(`/api/months/${month}`)); } catch (e) { setError((e as Error).message); setView(null); } finally { setBusy(false); }
+    try { const v = await api<MonthView>(`/api/months/${month}`); if (n === seq.current) setView(v); }
+    catch (e) { if (n === seq.current) { setError((e as Error).message); setView(null); } }
+    finally { if (n === seq.current) setBusy(false); }
   }, [month]);
   useEffect(() => { setOpen(null); load(); }, [load]);
 

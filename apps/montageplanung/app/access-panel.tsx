@@ -17,7 +17,7 @@ const actions: Record<string, string> = {
   resource: 'Ressource gespeichert', archiveResource: 'Mitarbeiter archiviert', restoreResource: 'Mitarbeiter wiederhergestellt',
   deleteResource: 'Ressource gelöscht', project: 'Projekt gespeichert', archiveProject: 'Projekt archiviert',
   restoreProject: 'Projekt wiederhergestellt', deleteProject: 'Projekt gelöscht', assign: 'Einteilung angelegt',
-  deleteAssignment: 'Einteilung gelöscht', unassign: 'Einteilungen entfernt', customer: 'Kunde gespeichert',
+  deleteAssignment: 'Einteilung gelöscht', unassign: 'Einteilungen entfernt', moveAssignment: 'Einteilung verschoben', copyWeek: 'Vorwoche übernommen', customer: 'Kunde gespeichert',
   requestVacation: 'Urlaub beantragt', approveVacation: 'Urlaub genehmigt', rejectVacation: 'Urlaub abgelehnt', withdrawVacation: 'Urlaubsantrag zurückgezogen',
   deleteCustomer: 'Kunde gelöscht', contact: 'Ansprechpartner gespeichert', deleteContact: 'Ansprechpartner gelöscht',
 };

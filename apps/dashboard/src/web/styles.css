@@ -76,3 +76,66 @@ svg text { fill: var(--muted); font-size: 10px; }
 .cal td { text-align: center; padding: 3px 4px; font-size: 12px; min-width: 44px; }
 .cal .abs { background: var(--warn-bg); }
 .cal .sat { background: var(--head); }
+
+.bwa-table .row { align-items: center; }
+.bwa-table .row h2 { margin: 0; }
+.bwa-table .scroll, .bwa-edit-actions { margin-top: 10px; }
+.bwa-table tbody th { position: static; background: var(--panel); font-weight: normal; }
+.bwa-amount { width: 10em; text-align: right; }
+
+.year-kpi > div { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 8px; }
+
+.cost-overview .row { margin-bottom: 10px; align-items: center; }
+.cost-overview .row h2 { margin: 0; }
+.cost-overview tbody th, .cost-overview tfoot th { position: static; background: transparent; }
+.cost-overview tbody th { font-weight: 500; }
+.cost-overview td:nth-child(2) { text-align: left; }
+.cost-overview tfoot { background: var(--head); font-weight: 600; }
+.cost-projection { background: color-mix(in srgb, var(--accent) 6%, var(--panel)); }
+.year-figure-detail { display: block; }
+.year-months tfoot { background: var(--head); font-weight: 600; }
+.year-months tfoot th { position: static; }
+.year-revenue { margin: 0 0 14px; }
+.year-revenue-legend { align-items: center; gap: 16px; margin: 0 0 8px; }
+.legend-forecast { background: repeating-linear-gradient(135deg, var(--accent) 0 2px, transparent 2px 5px); border: 1px solid var(--accent); }
+.year-revenue-scroll { overflow-x: auto; }
+.year-revenue-scroll svg { display: block; min-width: 1130px; }
+.year-revenue-scroll text { font-size: 12px; font-variant-numeric: tabular-nums; }
+.year-revenue-scroll .year-revenue-value { fill: var(--ink); font-weight: 650; }
+.year-revenue-scroll .year-revenue-month { font-size: 13px; }
+.year-revenue figcaption { color: var(--muted); font-size: 13px; }
+.employee-absences-today { display: flex; flex-wrap: wrap; gap: 6px 20px; list-style: none; margin: 0; padding: 0; }
+.employee-absences-today li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+
+.project-overview .scroll { max-height: none; }
+.project-overview tbody th { position: static; background: transparent; font-weight: 500; }
+.project-overview-header { align-items: center; margin-bottom: 12px; }
+.project-overview-header h2 { margin: 0; }
+.project-order { width: 8em; text-align: right; }
+.sub-calendar-header { align-items: center; margin-bottom: 12px; }
+.sub-calendar-header h2 { margin: 0; }
+.sub-months { display: grid; grid-template-columns: repeat(auto-fit,minmax(96px,1fr)); gap: 6px; margin-top: 8px; }
+.sub-table-scroll { overflow-x: auto; }
+.sub-overview tbody th { position: static; background: transparent; }
+.sub-firm-toggle { border: 0; background: transparent; color: var(--ink); cursor: pointer; font: inherit; padding: 4px 0; }
+.sub-firm-toggle span { color: var(--accent); }
+.sub-overview .sub-expanded-firm { padding: 0 10px 10px; background: var(--head); text-align: left; }
+.sub-week-panel { white-space: normal; }
+.sub-week { padding: 10px 0; border-top: 1px solid var(--line); }
+.sub-week:first-child { border-top: 0; }
+.sub-week h3 { margin: 4px 0; font-size: 14px; }
+.sub-week-total td { font-weight: 600; }
+.sub-week details { margin-top: 6px; }
+.sub-week summary { color: var(--muted); cursor: pointer; }
+.overview-chart-heading { align-items: center; }
+.overview-chart-heading h2 { margin: 0; }
+.overview-chart-mode { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.overview-staff-rate { display: block; }
+.overview-chart-scroll { overflow-x: auto; margin-top: 10px; }
+.overview-chart-scroll svg { display: block; }
+.overview-chart-mark:hover, .overview-chart-mark:focus { fill: color-mix(in srgb, var(--ink) 7%, transparent); outline: none; }
+.overview-legend { display: inline-flex; align-items: center; gap: 5px; }
+.overview-legend span { width: 10px; height: 10px; border-radius: 2px; }
+.legend-own { background: var(--accent); }
+.legend-sub { background: var(--amber); }
+.overview-chart-readout { min-height: 22px; display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--muted); font-size: 12px; }

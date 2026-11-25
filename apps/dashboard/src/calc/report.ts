@@ -203,3 +203,40 @@ function rowsHeads(rows: SubRow[]): Map<string, number> {
 }
 
 export type MonthReport = ReturnType<typeof buildMonth>;
+
+export function projectYearRanking(reports:{projects:Pick<MonthReport['projects'][number],'id'|'label'|'revenue'|'before'|'after'|'subCostMissing'>[]}[]){
+  const projects=new Map<string,{id:string;label:string;revenue:number;before:number;after:number|null;incomplete:boolean}>();
+  for(const report of reports){
+    for(const project of report.projects){
+      const row=projects.get(project.id)??{id:project.id,label:project.label,revenue:0,before:0,after:0,incomplete:false};
+      row.revenue+=project.revenue;
+      row.before+=project.before;
+      row.after=row.after===null||project.after===null?null:row.after+project.after;
+      row.incomplete||=project.subCostMissing;
+      projects.set(project.id,row);
+    }
+  }
+  const complete=[...projects.values()].filter(project=>!project.incomplete)
+    .map(({incomplete:_,...project})=>project)
+    .sort((a,b)=>b.before-a.before||a.label.localeCompare(b.label,'de'));
+  return {
+    projectsTop:complete.filter(project=>project.before>0).slice(0,5),
+    projectsFlop:complete.filter(project=>project.before<0).reverse().slice(0,5),
+  };
+}
+
+export function employeeYearRanking(reports:Pick<MonthReport,'month'|'employees'>[],year:number,today:string){
+  const employeeRankingMonth=year+'-'+today.slice(5,7);
+  const employees=new Map<string,{id:string;name:string;real:number;fiction:number;valuation:number;monthlyReal:number|null}>();
+  for(const report of reports){
+    for(const employee of report.employees){
+      const row=employees.get(employee.id)??{id:employee.id,name:employee.name,real:0,fiction:0,valuation:0,monthlyReal:null};
+      row.real+=employee.real;
+      row.fiction+=employee.fiction;
+      row.valuation+=employee.valuation;
+      if(report.month===employeeRankingMonth)row.monthlyReal=employee.real;
+      employees.set(employee.id,row);
+    }
+  }
+  return {employeeRankingMonth,employees:[...employees.values()].sort((a,b)=>b.real-a.real)};
+}

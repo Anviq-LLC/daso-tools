@@ -1,0 +1,2331 @@
+{
+  "fetchedAt": "2026-11-18T12:57:46.899Z",
+  "months": {
+    "2026-10": {
+      "summary": {
+        "month": "2026-10",
+        "approval": "saved",
+        "dataDate": "2026-11-18",
+        "ownRevenueEur": 7410,
+        "subRevenueEur": 12766.85,
+        "sumRevenueEur": 20176.85,
+        "ownPipelineEur": 1430,
+        "subPipelineEur": 1430,
+        "overheadEur": 18500,
+        "forecastEur": 20176.85,
+        "note": "Umsatz = Kundenumsatz netto zum Leistungsdatum. Prognose ist keine BWA."
+      },
+      "subs": [
+        {
+          "subcontractor": "Oleksii Kompanets",
+          "revenueEur": 11336.85,
+          "costEur": 7070,
+          "profitEur": 4266.85,
+          "personDays": 19,
+          "hours": 229,
+          "perPersonDayEur": 596.68
+        },
+        {
+          "subcontractor": "Rafal",
+          "revenueEur": 1430,
+          "costEur": 620,
+          "profitEur": 810,
+          "personDays": 2,
+          "hours": 20,
+          "perPersonDayEur": 715
+        }
+      ],
+      "projects": [
+        {
+          "projectId": "9af0e64a-3170-481b-b1ad-079d48d4f274",
+          "project": "725321 Düsseldorf - Uniq Tower",
+          "ownRevenueEur": 0,
+          "subRevenueEur": 5981.24,
+          "sumRevenueEur": 5981.24,
+          "subCostEur": 4410,
+          "profitBeforeOverheadEur": 1571.24,
+          "overheadShareEur": 5484.15
+        },
+        {
+          "projectId": "310f4cae-8786-4d48-82d1-0de0da350b2f",
+          "project": "3635 Aachen Exyte",
+          "ownRevenueEur": 5980,
+          "subRevenueEur": 0,
+          "sumRevenueEur": 5980,
+          "subCostEur": 0,
+          "profitBeforeOverheadEur": 5980,
+          "overheadShareEur": 5483.02
+        },
+        {
+          "projectId": "c4038666-7abe-4b70-9ace-030ad4b2131c",
+          "project": "202510780 Contwig - Amazon",
+          "ownRevenueEur": 0,
+          "subRevenueEur": 5355.61,
+          "sumRevenueEur": 5355.61,
+          "subCostEur": 2660,
+          "profitBeforeOverheadEur": 2695.61,
+          "overheadShareEur": 4910.52
+        },
+        {
+          "projectId": "fd646ea7-c1a5-4486-a6fb-30bf5dfd6cb3",
+          "project": "ohne Nummer MIP Famar",
+          "ownRevenueEur": 1430,
+          "subRevenueEur": 1430,
+          "sumRevenueEur": 2860,
+          "subCostEur": 620,
+          "profitBeforeOverheadEur": 2240,
+          "overheadShareEur": 2622.31
+        },
+        {
+          "projectId": "bbe98805-f8bd-41a8-8072-a56ad982a3c5",
+          "project": "ohne Nummer St. Ingbert - Campus CISPA",
+          "ownRevenueEur": 0,
+          "subRevenueEur": 0,
+          "sumRevenueEur": 0,
+          "subCostEur": 0,
+          "profitBeforeOverheadEur": 0,
+          "overheadShareEur": 0
+        },
+        {
+          "projectId": "ad4931ff-2664-4cbd-8c45-880844da0e0f",
+          "project": "Kom. 25082 WiWa Lahnau",
+          "ownRevenueEur": 0,
+          "subRevenueEur": 0,
+          "sumRevenueEur": 0,
+          "subCostEur": 0,
+          "profitBeforeOverheadEur": 0,
+          "overheadShareEur": 0
+        }
+      ],
+      "revenue": [
+        {
+          "day": "2026-10-01",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 8,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-02",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 7,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-03",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-04",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-05",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 8,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-06",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 5,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-07",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 8,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-08",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 6,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-09",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 5,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-10",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-11",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-12",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 5,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-13",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 8,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-14",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 8,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-15",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 5,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-16",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 8,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-17",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 2,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-18",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-19",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 7,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-20",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 7,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-21",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 7,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-22",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 7,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-23",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 5,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-24",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-25",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-26",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 7,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-27",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 8,
+          "ownPerHeadEur": 0,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-10-28",
+          "ownEur": 2210,
+          "subEur": 3031.9,
+          "totalEur": 5241.9,
+          "ownHeads": 9,
+          "ownPerHeadEur": 245.56,
+          "subHeads": 5,
+          "subPerHeadEur": 606.38
+        },
+        {
+          "day": "2026-10-29",
+          "ownEur": 2080,
+          "subEur": 3503.61,
+          "totalEur": 5583.61,
+          "ownHeads": 9,
+          "ownPerHeadEur": 231.11,
+          "subHeads": 6,
+          "subPerHeadEur": 583.94
+        },
+        {
+          "day": "2026-10-30",
+          "ownEur": 3120,
+          "subEur": 5776.34,
+          "totalEur": 8896.34,
+          "ownHeads": 9,
+          "ownPerHeadEur": 346.67,
+          "subHeads": 8,
+          "subPerHeadEur": 722.04
+        },
+        {
+          "day": "2026-10-31",
+          "ownEur": 0,
+          "subEur": 455,
+          "totalEur": 455,
+          "ownHeads": 4,
+          "ownPerHeadEur": 0,
+          "subHeads": 2,
+          "subPerHeadEur": 227.5
+        }
+      ]
+    },
+    "2026-11": {
+      "summary": {
+        "month": "2026-11",
+        "approval": "saved",
+        "dataDate": "2026-11-18",
+        "ownRevenueEur": 34545.52,
+        "subRevenueEur": 62066.02,
+        "sumRevenueEur": 96611.54,
+        "ownPipelineEur": 503.6,
+        "subPipelineEur": 9170.28,
+        "overheadEur": 18500,
+        "forecastEur": 161019.22,
+        "note": "Umsatz = Kundenumsatz netto zum Leistungsdatum. Prognose ist keine BWA."
+      },
+      "subs": [
+        {
+          "subcontractor": "Oleksii Kompanets",
+          "revenueEur": 44408.95,
+          "costEur": 30579,
+          "profitEur": 13829.95,
+          "personDays": 66,
+          "hours": 698.5,
+          "perPersonDayEur": 672.86
+        },
+        {
+          "subcontractor": "Rafal",
+          "revenueEur": 17095,
+          "costEur": 12904,
+          "profitEur": 4191,
+          "personDays": 22,
+          "hours": 239,
+          "perPersonDayEur": 777.05
+        },
+        {
+          "subcontractor": "Marcin - Lukasz",
+          "revenueEur": 562.07,
+          "costEur": 700,
+          "profitEur": -137.93,
+          "personDays": 2,
+          "hours": 20,
+          "perPersonDayEur": 281.04
+        }
+      ],
+      "projects": [
+        {
+          "projectId": "fd646ea7-c1a5-4486-a6fb-30bf5dfd6cb3",
+          "project": "ohne Nummer MIP Famar",
+          "ownRevenueEur": 5167.5,
+          "subRevenueEur": 28340,
+          "sumRevenueEur": 33507.5,
+          "subCostEur": 12904,
+          "profitBeforeOverheadEur": 20603.5,
+          "overheadShareEur": 6416.3
+        },
+        {
+          "projectId": "9af0e64a-3170-481b-b1ad-079d48d4f274",
+          "project": "725321 Düsseldorf - Uniq Tower",
+          "ownRevenueEur": 210,
+          "subRevenueEur": 27768.95,
+          "sumRevenueEur": 27978.95,
+          "subCostEur": 14980,
+          "profitBeforeOverheadEur": 12998.95,
+          "overheadShareEur": 5357.65
+        },
+        {
+          "projectId": "310f4cae-8786-4d48-82d1-0de0da350b2f",
+          "project": "3635 Aachen Exyte",
+          "ownRevenueEur": 11895,
+          "subRevenueEur": 0,
+          "sumRevenueEur": 11895,
+          "subCostEur": 0,
+          "profitBeforeOverheadEur": 11895,
+          "overheadShareEur": 2277.76
+        },
+        {
+          "projectId": "bbe98805-f8bd-41a8-8072-a56ad982a3c5",
+          "project": "ohne Nummer St. Ingbert - Campus CISPA",
+          "ownRevenueEur": 9277.01,
+          "subRevenueEur": 562.07,
+          "sumRevenueEur": 9839.08,
+          "subCostEur": 700,
+          "profitBeforeOverheadEur": 9139.08,
+          "overheadShareEur": 1884.07
+        },
+        {
+          "projectId": "c8d62658-b1e0-4312-af23-a9c6b6ceb62b",
+          "project": "P26/000005 Lahnau - Janitza",
+          "ownRevenueEur": 7996.01,
+          "subRevenueEur": 0,
+          "sumRevenueEur": 7996.01,
+          "subCostEur": 0,
+          "profitBeforeOverheadEur": 7996.01,
+          "overheadShareEur": 1531.14
+        },
+        {
+          "projectId": "8ec5326b-39e1-4d1f-957b-054f5e966774",
+          "project": "x Schule Düsseldorf",
+          "ownRevenueEur": 0,
+          "subRevenueEur": 4095,
+          "sumRevenueEur": 4095,
+          "subCostEur": 1995,
+          "profitBeforeOverheadEur": 2100,
+          "overheadShareEur": 784.15
+        },
+        {
+          "projectId": "c4038666-7abe-4b70-9ace-030ad4b2131c",
+          "project": "202510780 Contwig - Amazon",
+          "ownRevenueEur": 0,
+          "subRevenueEur": 1300,
+          "sumRevenueEur": 1300,
+          "subCostEur": 700,
+          "profitBeforeOverheadEur": 600,
+          "overheadShareEur": 248.93
+        },
+        {
+          "projectId": "ad4931ff-2664-4cbd-8c45-880844da0e0f",
+          "project": "Kom. 25082 WiWa Lahnau",
+          "ownRevenueEur": 0,
+          "subRevenueEur": 0,
+          "sumRevenueEur": 0,
+          "subCostEur": 0,
+          "profitBeforeOverheadEur": 0,
+          "overheadShareEur": 0
+        }
+      ],
+      "revenue": [
+        {
+          "day": "2026-11-01",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-02",
+          "ownEur": 1105,
+          "subEur": 2641,
+          "totalEur": 3746,
+          "ownHeads": 7,
+          "ownPerHeadEur": 157.86,
+          "subHeads": 4,
+          "subPerHeadEur": 660.25
+        },
+        {
+          "day": "2026-11-03",
+          "ownEur": 2862.77,
+          "subEur": 4964.49,
+          "totalEur": 7827.26,
+          "ownHeads": 6,
+          "ownPerHeadEur": 477.13,
+          "subHeads": 8,
+          "subPerHeadEur": 620.56
+        },
+        {
+          "day": "2026-11-04",
+          "ownEur": 4282.51,
+          "subEur": 4903.19,
+          "totalEur": 9185.7,
+          "ownHeads": 8,
+          "ownPerHeadEur": 535.31,
+          "subHeads": 8,
+          "subPerHeadEur": 612.9
+        },
+        {
+          "day": "2026-11-05",
+          "ownEur": 4996.56,
+          "subEur": 5465.33,
+          "totalEur": 10461.89,
+          "ownHeads": 6,
+          "ownPerHeadEur": 832.76,
+          "subHeads": 8,
+          "subPerHeadEur": 683.17
+        },
+        {
+          "day": "2026-11-06",
+          "ownEur": 2055.01,
+          "subEur": 5905.38,
+          "totalEur": 7960.39,
+          "ownHeads": 7,
+          "ownPerHeadEur": 293.57,
+          "subHeads": 8,
+          "subPerHeadEur": 738.17
+        },
+        {
+          "day": "2026-11-07",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-08",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-09",
+          "ownEur": 3298.13,
+          "subEur": 3870.82,
+          "totalEur": 7168.95,
+          "ownHeads": 6,
+          "ownPerHeadEur": 549.69,
+          "subHeads": 6,
+          "subPerHeadEur": 645.14
+        },
+        {
+          "day": "2026-11-10",
+          "ownEur": 3420.34,
+          "subEur": 4000.82,
+          "totalEur": 7421.16,
+          "ownHeads": 6,
+          "ownPerHeadEur": 570.06,
+          "subHeads": 6,
+          "subPerHeadEur": 666.8
+        },
+        {
+          "day": "2026-11-11",
+          "ownEur": 4279.36,
+          "subEur": 5122.66,
+          "totalEur": 9402.02,
+          "ownHeads": 6,
+          "ownPerHeadEur": 713.23,
+          "subHeads": 9,
+          "subPerHeadEur": 569.18
+        },
+        {
+          "day": "2026-11-12",
+          "ownEur": 3576.96,
+          "subEur": 6837.54,
+          "totalEur": 10414.5,
+          "ownHeads": 7,
+          "ownPerHeadEur": 510.99,
+          "subHeads": 9,
+          "subPerHeadEur": 759.73
+        },
+        {
+          "day": "2026-11-13",
+          "ownEur": 780,
+          "subEur": 4933.37,
+          "totalEur": 5713.37,
+          "ownHeads": 2,
+          "ownPerHeadEur": 390,
+          "subHeads": 6,
+          "subPerHeadEur": 822.23
+        },
+        {
+          "day": "2026-11-14",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-15",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-16",
+          "ownEur": 195,
+          "subEur": 8569.35,
+          "totalEur": 8764.35,
+          "ownHeads": 2,
+          "ownPerHeadEur": 97.5,
+          "subHeads": 10,
+          "subPerHeadEur": 856.94
+        },
+        {
+          "day": "2026-11-17",
+          "ownEur": 3693.88,
+          "subEur": 4852.07,
+          "totalEur": 8545.95,
+          "ownHeads": 7,
+          "ownPerHeadEur": 527.7,
+          "subHeads": 8,
+          "subPerHeadEur": 606.51
+        },
+        {
+          "day": "2026-11-18",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-19",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-20",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-21",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-22",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-23",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-24",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-25",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-26",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-27",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-28",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-29",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        },
+        {
+          "day": "2026-11-30",
+          "ownEur": 0,
+          "subEur": 0,
+          "totalEur": 0,
+          "ownHeads": 0,
+          "ownPerHeadEur": null,
+          "subHeads": 0,
+          "subPerHeadEur": null
+        }
+      ]
+    }
+  },
+  "views": {
+    "v_sub_day": [
+      {
+        "day": "2026-10-28",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "202510780 Contwig - Amazon",
+        "binding": 1,
+        "revenue_eur": 1504.1,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-10-28",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 403.9,
+        "cost_eur": 350,
+        "heads": 1,
+        "hours": 10
+      },
+      {
+        "day": "2026-10-28",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1123.9,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 32
+      },
+      {
+        "day": "2026-10-29",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "202510780 Contwig - Amazon",
+        "binding": 1,
+        "revenue_eur": 1213.23,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-10-29",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1145.19,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 22
+      },
+      {
+        "day": "2026-10-29",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1145.19,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 22
+      },
+      {
+        "day": "2026-10-29",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-10-30",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "202510780 Contwig - Amazon",
+        "binding": 1,
+        "revenue_eur": 2183.28,
+        "cost_eur": 1260,
+        "heads": 2,
+        "hours": 36
+      },
+      {
+        "day": "2026-10-30",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1201.53,
+        "cost_eur": 1260,
+        "heads": 2,
+        "hours": 40
+      },
+      {
+        "day": "2026-10-30",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 961.53,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-10-30",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-10-31",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "202510780 Contwig - Amazon",
+        "binding": 1,
+        "revenue_eur": 455,
+        "cost_eur": 0,
+        "heads": 2,
+        "hours": 7
+      },
+      {
+        "day": "2026-11-02",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1380.5,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 22
+      },
+      {
+        "day": "2026-11-02",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-02",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1260.5,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-02",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-03",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1052.24,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-03",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-03",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1052.25,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-03",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-04",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1126.59,
+        "cost_eur": 630,
+        "heads": 2,
+        "hours": 21.5
+      },
+      {
+        "day": "2026-11-04",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-04",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 916.6,
+        "cost_eur": 630,
+        "heads": 2,
+        "hours": 18
+      },
+      {
+        "day": "2026-11-04",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-05",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1602.66,
+        "cost_eur": 630,
+        "heads": 2,
+        "hours": 28
+      },
+      {
+        "day": "2026-11-05",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-05",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1002.67,
+        "cost_eur": 630,
+        "heads": 2,
+        "hours": 18
+      },
+      {
+        "day": "2026-11-05",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-06",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1620.19,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-06",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1235,
+        "cost_eur": 595,
+        "heads": 2,
+        "hours": 17
+      },
+      {
+        "day": "2026-11-06",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1620.19,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-06",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-09",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1405.41,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 28
+      },
+      {
+        "day": "2026-11-09",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1165.41,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-09",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1300,
+        "cost_eur": 558,
+        "heads": 2,
+        "hours": 18
+      },
+      {
+        "day": "2026-11-10",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1405.41,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 28
+      },
+      {
+        "day": "2026-11-10",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 130,
+        "cost_eur": null,
+        "heads": null,
+        "hours": null
+      },
+      {
+        "day": "2026-11-10",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1165.41,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-10",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 130,
+        "cost_eur": null,
+        "heads": null,
+        "hours": null
+      },
+      {
+        "day": "2026-11-10",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-11",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T1",
+        "project": "x Schule Düsseldorf",
+        "binding": 1,
+        "revenue_eur": 1300,
+        "cost_eur": 630,
+        "heads": 2,
+        "hours": 18
+      },
+      {
+        "day": "2026-11-11",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 838.83,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-11",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "x Schule Düsseldorf",
+        "binding": 1,
+        "revenue_eur": 650,
+        "cost_eur": 315,
+        "heads": 1,
+        "hours": 9
+      },
+      {
+        "day": "2026-11-11",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 838.83,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-11",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1495,
+        "cost_eur": 651,
+        "heads": 2,
+        "hours": 21
+      },
+      {
+        "day": "2026-11-12",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T1",
+        "project": "x Schule Düsseldorf",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-12",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1631.27,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-12",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 130,
+        "cost_eur": null,
+        "heads": null,
+        "hours": null
+      },
+      {
+        "day": "2026-11-12",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "x Schule Düsseldorf",
+        "binding": 1,
+        "revenue_eur": 715,
+        "cost_eur": 350,
+        "heads": 1,
+        "hours": 10
+      },
+      {
+        "day": "2026-11-12",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1631.27,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-12",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 910,
+        "cost_eur": null,
+        "heads": 1,
+        "hours": 10
+      },
+      {
+        "day": "2026-11-12",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-13",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1751.69,
+        "cost_eur": 1260,
+        "heads": 2,
+        "hours": 36
+      },
+      {
+        "day": "2026-11-13",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1751.68,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-13",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-16",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T1",
+        "project": "202510780 Contwig - Amazon",
+        "binding": 1,
+        "revenue_eur": 1300,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-16",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 1820,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-16",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-16",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 1,
+        "revenue_eur": 1549.35,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 25
+      },
+      {
+        "day": "2026-11-16",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-16",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 1950,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-16",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 2860,
+        "cost_eur": 1240,
+        "heads": 2,
+        "hours": 40
+      },
+      {
+        "day": "2026-11-17",
+        "firm": "Marcin - Lukasz",
+        "subcontractor": "Marcin - Lukasz",
+        "team": "T1",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "binding": 1,
+        "revenue_eur": 562.07,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-17",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 260,
+        "cost_eur": null,
+        "heads": null,
+        "hours": null
+      },
+      {
+        "day": "2026-11-17",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T2",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-17",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "binding": 0,
+        "revenue_eur": 720.28,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-17",
+        "firm": "Oleksii Kompanets",
+        "subcontractor": "Oleksii Kompanets",
+        "team": "T3",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 700,
+        "heads": 2,
+        "hours": 20
+      },
+      {
+        "day": "2026-11-17",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 0,
+        "revenue_eur": 260,
+        "cost_eur": null,
+        "heads": null,
+        "hours": null
+      },
+      {
+        "day": "2026-11-17",
+        "firm": "Rafal",
+        "subcontractor": "Rafal",
+        "team": "T1",
+        "project": "ohne Nummer MIP Famar",
+        "binding": 1,
+        "revenue_eur": 1430,
+        "cost_eur": 620,
+        "heads": 2,
+        "hours": 20
+      }
+    ],
+    "v_project_day": [
+      {
+        "day": "2026-10-28",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 2210
+      },
+      {
+        "day": "2026-10-28",
+        "project": "202510780 Contwig - Amazon",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1504.1
+      },
+      {
+        "day": "2026-10-28",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1527.8
+      },
+      {
+        "day": "2026-10-29",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 2080
+      },
+      {
+        "day": "2026-10-29",
+        "project": "ohne Nummer MIP Famar",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-10-29",
+        "project": "202510780 Contwig - Amazon",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1213.23
+      },
+      {
+        "day": "2026-10-29",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2290.38
+      },
+      {
+        "day": "2026-10-29",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 0,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-10-30",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1690
+      },
+      {
+        "day": "2026-10-30",
+        "project": "ohne Nummer MIP Famar",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-10-30",
+        "project": "202510780 Contwig - Amazon",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2183.28
+      },
+      {
+        "day": "2026-10-30",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2163.06
+      },
+      {
+        "day": "2026-10-30",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-10-31",
+        "project": "Kom. 25082 WiWa Lahnau",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 0
+      },
+      {
+        "day": "2026-10-31",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 0
+      },
+      {
+        "day": "2026-10-31",
+        "project": "202510780 Contwig - Amazon",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 455
+      },
+      {
+        "day": "2026-11-02",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1105
+      },
+      {
+        "day": "2026-11-02",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2641
+      },
+      {
+        "day": "2026-11-02",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 0,
+        "revenue_eur": 2860
+      },
+      {
+        "day": "2026-11-03",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1105
+      },
+      {
+        "day": "2026-11-03",
+        "project": "P26/000005 Lahnau - Janitza",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 650
+      },
+      {
+        "day": "2026-11-03",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1107.77
+      },
+      {
+        "day": "2026-11-03",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2104.49
+      },
+      {
+        "day": "2026-11-03",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2860
+      },
+      {
+        "day": "2026-11-04",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1105
+      },
+      {
+        "day": "2026-11-04",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 210
+      },
+      {
+        "day": "2026-11-04",
+        "project": "P26/000005 Lahnau - Janitza",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1950
+      },
+      {
+        "day": "2026-11-04",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 0
+      },
+      {
+        "day": "2026-11-04",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1017.51
+      },
+      {
+        "day": "2026-11-04",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2043.19
+      },
+      {
+        "day": "2026-11-04",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2860
+      },
+      {
+        "day": "2026-11-05",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1105
+      },
+      {
+        "day": "2026-11-05",
+        "project": "Kom. 25082 WiWa Lahnau",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 0
+      },
+      {
+        "day": "2026-11-05",
+        "project": "P26/000005 Lahnau - Janitza",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 2821
+      },
+      {
+        "day": "2026-11-05",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1070.56
+      },
+      {
+        "day": "2026-11-05",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2605.33
+      },
+      {
+        "day": "2026-11-05",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2860
+      },
+      {
+        "day": "2026-11-06",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 780
+      },
+      {
+        "day": "2026-11-06",
+        "project": "P26/000005 Lahnau - Janitza",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1275.01
+      },
+      {
+        "day": "2026-11-06",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 3240.38
+      },
+      {
+        "day": "2026-11-06",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2665
+      },
+      {
+        "day": "2026-11-09",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1105
+      },
+      {
+        "day": "2026-11-09",
+        "project": "P26/000005 Lahnau - Janitza",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 349.7
+      },
+      {
+        "day": "2026-11-09",
+        "project": "ohne Nummer MIP Famar",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1300
+      },
+      {
+        "day": "2026-11-09",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 893.13
+      },
+      {
+        "day": "2026-11-09",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2570.82
+      },
+      {
+        "day": "2026-11-09",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1300
+      },
+      {
+        "day": "2026-11-10",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 715
+      },
+      {
+        "day": "2026-11-10",
+        "project": "ohne Nummer MIP Famar",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-11-10",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 0
+      },
+      {
+        "day": "2026-11-10",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1275.34
+      },
+      {
+        "day": "2026-11-10",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2570.82
+      },
+      {
+        "day": "2026-11-10",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 0,
+        "revenue_eur": 260
+      },
+      {
+        "day": "2026-11-10",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-11-11",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 845
+      },
+      {
+        "day": "2026-11-11",
+        "project": "ohne Nummer MIP Famar",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1495
+      },
+      {
+        "day": "2026-11-11",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1939.36
+      },
+      {
+        "day": "2026-11-11",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1677.66
+      },
+      {
+        "day": "2026-11-11",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1495
+      },
+      {
+        "day": "2026-11-11",
+        "project": "x Schule Düsseldorf",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1950
+      },
+      {
+        "day": "2026-11-12",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1105
+      },
+      {
+        "day": "2026-11-12",
+        "project": "ohne Nummer MIP Famar",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 942.5
+      },
+      {
+        "day": "2026-11-12",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 153.9
+      },
+      {
+        "day": "2026-11-12",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1529.46
+      },
+      {
+        "day": "2026-11-12",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 3262.54
+      },
+      {
+        "day": "2026-11-12",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 0,
+        "revenue_eur": 1040
+      },
+      {
+        "day": "2026-11-12",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-11-12",
+        "project": "x Schule Düsseldorf",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 2145
+      },
+      {
+        "day": "2026-11-13",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 780
+      },
+      {
+        "day": "2026-11-13",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 3503.37
+      },
+      {
+        "day": "2026-11-13",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1430
+      },
+      {
+        "day": "2026-11-16",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 195
+      },
+      {
+        "day": "2026-11-16",
+        "project": "202510780 Contwig - Amazon",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1300
+      },
+      {
+        "day": "2026-11-16",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 1549.35
+      },
+      {
+        "day": "2026-11-16",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 0,
+        "revenue_eur": 3770
+      },
+      {
+        "day": "2026-11-16",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 5720
+      },
+      {
+        "day": "2026-11-17",
+        "project": "3635 Aachen Exyte",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1950
+      },
+      {
+        "day": "2026-11-17",
+        "project": "P26/000005 Lahnau - Janitza",
+        "source": "own",
+        "binding": 0,
+        "revenue_eur": 0
+      },
+      {
+        "day": "2026-11-17",
+        "project": "P26/000005 Lahnau - Janitza",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 1300
+      },
+      {
+        "day": "2026-11-17",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "own",
+        "binding": 1,
+        "revenue_eur": 443.88
+      },
+      {
+        "day": "2026-11-17",
+        "project": "725321 Düsseldorf - Uniq Tower",
+        "source": "sub",
+        "binding": 0,
+        "revenue_eur": 720.28
+      },
+      {
+        "day": "2026-11-17",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 0,
+        "revenue_eur": 520
+      },
+      {
+        "day": "2026-11-17",
+        "project": "ohne Nummer MIP Famar",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 4290
+      },
+      {
+        "day": "2026-11-17",
+        "project": "ohne Nummer St. Ingbert - Campus CISPA",
+        "source": "sub",
+        "binding": 1,
+        "revenue_eur": 562.07
+      }
+    ],
+    "v_revenue_day": [
+      {
+        "day": "2026-10-28",
+        "own_revenue_eur": 2210
+      },
+      {
+        "day": "2026-10-29",
+        "own_revenue_eur": 2080
+      },
+      {
+        "day": "2026-10-30",
+        "own_revenue_eur": 3120
+      },
+      {
+        "day": "2026-10-31",
+        "own_revenue_eur": 0
+      },
+      {
+        "day": "2026-11-02",
+        "own_revenue_eur": 1105
+      },
+      {
+        "day": "2026-11-03",
+        "own_revenue_eur": 2862.77
+      },
+      {
+        "day": "2026-11-04",
+        "own_revenue_eur": 4282.51
+      },
+      {
+        "day": "2026-11-05",
+        "own_revenue_eur": 4996.56
+      },
+      {
+        "day": "2026-11-06",
+        "own_revenue_eur": 2055.01
+      },
+      {
+        "day": "2026-11-09",
+        "own_revenue_eur": 3298.13
+      },
+      {
+        "day": "2026-11-10",
+        "own_revenue_eur": 3420.34
+      },
+      {
+        "day": "2026-11-11",
+        "own_revenue_eur": 4279.36
+      },
+      {
+        "day": "2026-11-12",
+        "own_revenue_eur": 3576.96
+      },
+      {
+        "day": "2026-11-13",
+        "own_revenue_eur": 780
+      },
+      {
+        "day": "2026-11-16",
+        "own_revenue_eur": 195
+      },
+      {
+        "day": "2026-11-17",
+        "own_revenue_eur": 3693.88
+      }
+    ]
+  },
+  "errors": {}
+}

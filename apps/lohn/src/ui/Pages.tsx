@@ -56,16 +56,13 @@ export function EmployeesPage({ month }: { month: string }) {
 
 type Loaded = Settings & { equalSplit: boolean };
 
-export function SettingsPage({ role }: { role: string }) {
+export function SettingsPage() {
   const [s, setS] = useState<Loaded | null>(null);
   const [holidays, setHolidays] = useState('');
   const [msg, setMsg] = useState('');
-  const [roles, setRoles] = useState<{ email: string; role: string; name: string }[]>([]);
-  const [newRole, setNewRole] = useState({ email: '', role: 'buchhaltung', name: '' });
   useEffect(() => {
     api<Loaded>('/api/settings').then((x) => { setS(x); setHolidays(x.holidays.join('\n')); }).catch((e) => setMsg(e.message));
-    if (role === 'gf') api<typeof roles>('/api/roles').then(setRoles).catch(() => {});
-  }, [role]);
+  }, []);
   if (!s) return <p className="muted">{msg || 'Lade ...'}</p>;
   const save = async () => {
     const list = holidays.split(/\s+/).filter(Boolean);
@@ -95,17 +92,6 @@ export function SettingsPage({ role }: { role: string }) {
         </fieldset>
       </div>
       <button className="primary" onClick={save}>Einstellungen speichern</button>
-      {role === 'gf' && (
-        <>
-          <h2>Zugänge</h2>
-          <ul>{roles.map((r) => <li key={r.email}>{r.email} · {r.role === 'gf' ? 'Geschäftsführung' : 'Buchhaltung'}</li>)}</ul>
-          <form className="inline" onSubmit={async (e) => { e.preventDefault(); try { await api('/api/roles', 'PUT', newRole); setRoles(await api('/api/roles')); setNewRole({ ...newRole, email: '' }); } catch (x) { setMsg((x as Error).message); } }}>
-            <input type="email" required placeholder="E-Mail" aria-label="E-Mail" value={newRole.email} onChange={(e) => setNewRole({ ...newRole, email: e.target.value })} />
-            <select aria-label="Rolle" value={newRole.role} onChange={(e) => setNewRole({ ...newRole, role: e.target.value })}><option value="buchhaltung">Buchhaltung</option><option value="gf">Geschäftsführung</option></select>
-            <button>Zugang setzen</button>
-          </form>
-        </>
-      )}
     </section>
   );
 }
@@ -130,10 +116,10 @@ export function ToolsPage({ month, setMonth }: { month: string; setMonth: (m: st
     <section>
       <h1>Werkzeugkonto</h1>
       {msg && <p role="alert" className="error">{msg}</p>}
-      <table>
+      <div className="scroll"><table>
         <thead><tr><th>Mitarbeiter</th><th className="num">Preis</th><th className="num">Rate</th><th className="num">Bisher abgezogen</th><th className="num">Vorab bezahlt</th><th className="num">Restschuld</th></tr></thead>
         <tbody>{tools.map((t) => <tr key={t.resource_id}><td>{name(t.resource_id)}</td><td className="num">{eur(t.price_cents)}</td><td className="num">{eur(t.monthly_rate_cents)}</td><td className="num">{eur(t.paid_before_cents)}</td><td className="num">{eur(t.prepaid_cents)}</td><td className="num">{eur(Math.max(0, t.price_cents - t.paid_before_cents - t.prepaid_cents))}</td></tr>)}</tbody>
-      </table>
+      </table></div>
       <form className="inline" aria-label="Werkzeugkonto anlegen" onSubmit={async (e) => {
         e.preventDefault();
         try { await api('/api/tools', 'PUT', { resourceId: f.resourceId, priceCents: toCents(f.price) ?? 0, monthlyRateCents: toCents(f.rate) ?? 0, prepaidCents: toCents(f.prepaid) ?? 0 }); setF({ resourceId: '', price: '', rate: '', prepaid: '' }); load(); } catch (x) { setMsg((x as Error).message); }
@@ -147,13 +133,13 @@ export function ToolsPage({ month, setMonth }: { month: string; setMonth: (m: st
 
       <h1>Externe Obermonteur-Wochen</h1>
       <div className="toolbar"><label>Monat <input type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} /></label><span className="muted">Wochen zählen nach Leistungsdatum im Monat.</span></div>
-      <table>
+      <div className="scroll"><table>
         <thead><tr><th>Woche</th><th className="num">Stunden</th><th className="num">Soll (Stunden × Satz)</th><th className="num">Rechnung netto</th><th className="num">Differenz</th><th /></tr></thead>
         <tbody>{view?.result.external.map((x) => (
           <tr key={x.id}><td>{x.label}</td><td className="num">{(x.minutes / 60).toFixed(1).replace('.', ',')}</td><td className="num">{eur(x.expected)}</td><td className="num">{eur(x.invoiced)}</td><td className={'num' + (x.diff ? ' neg' : '')}>{eur(x.diff)}</td>
             <td>{!view.frozen && <button onClick={async () => { await api(`/api/external/${x.id}`, 'DELETE'); load(); }}>Löschen</button>}</td></tr>
         ))}</tbody>
-      </table>
+      </table></div>
       {view && !view.frozen && (
         <form className="inline" aria-label="Woche erfassen" onSubmit={async (e) => {
           e.preventDefault();
@@ -176,8 +162,48 @@ export function AuditPage() {
   return (
     <section>
       <h1>Protokoll</h1>
-      <table><thead><tr><th>Zeit</th><th>Person</th><th>Aktion</th><th>Details</th></tr></thead>
-        <tbody>{rows.map((r, i) => <tr key={i}><td>{new Date(r.at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}</td><td>{r.actor}</td><td>{r.action}</td><td>{r.detail}</td></tr>)}</tbody></table>
+      <div className="scroll"><table><thead><tr><th>Zeit</th><th>Person</th><th>Aktion</th><th>Details</th></tr></thead>
+        <tbody>{rows.map((r, i) => <tr key={i}><td>{new Date(r.at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}</td><td>{r.actor}</td><td>{r.action}</td><td>{r.detail}</td></tr>)}</tbody></table></div>
+    </section>
+  );
+}
+
+type Role = { email: string; role: string; name: string };
+const ROLE_LABEL: Record<string, string> = { gf: 'Geschäftsführung', buchhaltung: 'Buchhaltung' };
+
+export function AccessPage({ me }: { me: string }) {
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [f, setF] = useState({ email: '', role: 'buchhaltung', name: '' });
+  const [msg, setMsg] = useState('');
+  const load = useCallback(() => api<Role[]>('/api/roles').then(setRoles).catch((e) => setMsg(e.message)), []);
+  useEffect(() => { load(); }, [load]);
+  const run = async (fn: () => Promise<unknown>) => { try { setMsg(''); await fn(); await load(); } catch (e) { setMsg((e as Error).message); } };
+  return (
+    <section>
+      <h1>Zugänge</h1>
+      <p className="muted">Wer sich im Lohntool anmelden darf. Wer hier nicht steht, sieht keine Daten.</p>
+      {msg && <p role="alert" className="error">{msg}</p>}
+      <div className="scroll"><table>
+        <thead><tr><th>E-Mail</th><th>Name</th><th>Rolle</th><th /></tr></thead>
+        <tbody>
+          <tr><td>{me}</td><td className="muted">Inhaber</td><td>Geschäftsführung</td><td /></tr>
+          {roles.filter((r) => r.email !== me).map((r) => (
+            <tr key={r.email}>
+              <td>{r.email}</td><td>{r.name}</td>
+              <td><select aria-label={`Rolle ${r.email}`} value={r.role} onChange={(e) => run(() => api('/api/roles', 'PUT', { ...r, role: e.target.value }))}>
+                {Object.entries(ROLE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></td>
+              <td><button onClick={() => run(() => api(`/api/roles/${encodeURIComponent(r.email)}`, 'DELETE'))}>Entfernen</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table></div>
+      <h2>Zugang hinzufügen</h2>
+      <form className="inline" onSubmit={(e) => { e.preventDefault(); run(async () => { await api('/api/roles', 'PUT', f); setF({ ...f, email: '', name: '' }); }); }}>
+        <input type="email" required placeholder="E-Mail" aria-label="E-Mail" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+        <input placeholder="Name" aria-label="Name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        <select aria-label="Rolle" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>{Object.entries(ROLE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+        <button className="primary">Zugang setzen</button>
+      </form>
     </section>
   );
 }

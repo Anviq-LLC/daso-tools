@@ -59,6 +59,6 @@ fieldset label { display: grid; grid-template-columns: 1fr 110px; gap: 8px; alig
 .payroll th { white-space: normal; min-width: 84px; } .payroll .sticky { min-width: 130px; } .amt { width: 92px; text-align: right; padding: 4px 6px; } .amt.day { width: 56px; } .amt::placeholder { color: var(--muted); opacity: .8; }
 .notes { margin-top: 16px; } .note { display: grid; gap: 6px; font-weight: 600; font-size: 13px; } .note textarea { width: 100%; font-weight: 400; }
 .sub { margin-top: 20px; }
-.cal { margin: 8px 0 12px; } .cal tr.gap td { background: var(--warn-bg); } .cal tr.error td { background: #fff0f1; color: var(--err); } .cal tfoot td { font-weight: 700; }
+.cal { margin: 8px 0 12px; } .cal thead th { position: static; } .cal tr.gap td { background: var(--warn-bg); } .cal tr.error td { background: #fff0f1; color: var(--err); } .cal tfoot td { font-weight: 700; }
 @page { size: A4 landscape; margin: 10mm; }
 @media print { .payroll .amt { border: 0; background: none; width: auto; } .payroll th { min-width: 0; } .notes textarea { border: 1px solid #999; } .bar, .toolbar button, .toolbar a, .inline, .ack { display: none; } body { background: #fff; color: #000; } .scroll { overflow: visible; border: 0; } }

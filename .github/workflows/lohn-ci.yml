@@ -1,0 +1,31 @@
+name: lohn-ci
+on:
+  push:
+    branches: [main]
+    paths: ['apps/lohn/**', '.github/workflows/lohn-ci.yml']
+  pull_request:
+    paths: ['apps/lohn/**', '.github/workflows/lohn-ci.yml']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      PW_CHANNEL: chrome
+    defaults:
+      run:
+        working-directory: apps/lohn
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: apps/lohn/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm exec playwright install chrome
+      - run: pnpm exec playwright test

@@ -1,0 +1,111 @@
+{
+  "source": "montageplanung",
+  "endpoint": "/api/catalog",
+  "fetchedAt": "2026-11-18T12:57:46.899Z",
+  "projects": [
+    {
+      "id": "a01b2786-f787-475b-ab9f-0288b2e675de",
+      "name": "Büro - Dürrholz",
+      "number": "",
+      "label": "Büro - Dürrholz",
+      "address": "Am Kohlenweg 1, 56307 Dürrholz",
+      "archived": false
+    },
+    {
+      "id": "fd646ea7-c1a5-4486-a6fb-30bf5dfd6cb3",
+      "name": "MIP Famar",
+      "number": "",
+      "label": "MIP Famar",
+      "address": "Technologie Park 5, 66424 Homburg",
+      "archived": false
+    },
+    {
+      "id": "bbe98805-f8bd-41a8-8072-a56ad982a3c5",
+      "name": "St. Ingbert - Campus CISPA",
+      "number": "",
+      "label": "St. Ingbert - Campus CISPA",
+      "address": "Am Güterbahnhof 2, 66386 St.Ingbert",
+      "archived": false
+    },
+    {
+      "id": "c4038666-7abe-4b70-9ace-030ad4b2131c",
+      "name": "Contwig - Amazon",
+      "number": "202510780",
+      "label": "202510780 Contwig - Amazon",
+      "address": "Seilmacherstraße 2, 66497 Contwig",
+      "archived": false
+    },
+    {
+      "id": "746e4c9f-4bd4-4ec4-a3bd-d3b1961c9937",
+      "name": "Köln/Bonn Flughafen - UPS",
+      "number": "20262907",
+      "label": "20262907 Köln/Bonn Flughafen - UPS",
+      "address": "KriegerStr. 12, 51147 Köln",
+      "archived": true
+    },
+    {
+      "id": "f4442b8b-cf60-4ec8-97f7-67d47818226e",
+      "name": "Bochum Universität",
+      "number": "2606000647",
+      "label": "2606000647 Bochum Universität",
+      "address": "Universitätsstraße 150, 44801 Bochum Süd,",
+      "archived": false
+    },
+    {
+      "id": "90864b46-194c-431f-b067-4db7c2fe8085",
+      "name": "Viega Kierkel - Caverion",
+      "number": "302850237.A.AC1",
+      "label": "302850237.A.AC1 Viega Kierkel - Caverion",
+      "address": "Kryptonstr. 66459 Kirkel",
+      "archived": false
+    },
+    {
+      "id": "310f4cae-8786-4d48-82d1-0de0da350b2f",
+      "name": "Aachen Exyte",
+      "number": "3635",
+      "label": "3635 Aachen Exyte",
+      "address": "Lilienthalstraße 1, 52068 Aachen",
+      "archived": false
+    },
+    {
+      "id": "ef38b463-0abd-4402-b756-441046e1abe2",
+      "name": "Köln - Düxx",
+      "number": "5-308 Düxx",
+      "label": "5-308 Düxx Köln - Düxx",
+      "address": "Siegburger Straße 239, 50679 Köln",
+      "archived": false
+    },
+    {
+      "id": "9af0e64a-3170-481b-b1ad-079d48d4f274",
+      "name": "Düsseldorf - Uniq Tower",
+      "number": "725321",
+      "label": "725321 Düsseldorf - Uniq Tower",
+      "address": "Kaiserstraße 1, 40221 Düsseldorf",
+      "archived": false
+    },
+    {
+      "id": "ad4931ff-2664-4cbd-8c45-880844da0e0f",
+      "name": "WiWa Lahnau",
+      "number": "Kom. 25082",
+      "label": "Kom. 25082 WiWa Lahnau",
+      "address": "Austraße, 35633 Lahnau-Waldgirmes",
+      "archived": false
+    },
+    {
+      "id": "c8d62658-b1e0-4312-af23-a9c6b6ceb62b",
+      "name": "Lahnau - Janitza",
+      "number": "P26/000005",
+      "label": "P26/000005 Lahnau - Janitza",
+      "address": "Vor dem Polstück 4, 35633 Lahnau - Waldgirmes, Hessen",
+      "archived": false
+    },
+    {
+      "id": "c5556e85-bfb3-45c8-ac5d-ab29d20555fb",
+      "name": "New Yorker Freiburg",
+      "number": "noch keine",
+      "label": "noch keine New Yorker Freiburg",
+      "address": "Kaiser-Joseph-Straße 168, 79098 Freiburg im Breisgau",
+      "archived": false
+    }
+  ]
+}

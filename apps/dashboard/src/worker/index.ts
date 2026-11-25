@@ -1,15 +1,17 @@
 import { can, HttpError, identify, need, readOnly, type Env, type Identity } from './auth.ts';
-import { berlinToday, monthReport, yearReport } from './data.ts';
+import { berlinToday, employeeCalendar, employeesAbsentToday, monthReport, overviewCalendar, projectRoster, subCalendar, yearReport } from './data.ts';
+import { employeePeriod } from '../calc/employee-calendar.ts';
+import { subCalendarFirms } from '../calc/sub-calendar.ts';
 import { checkSettings, loadSettings, saveSettings } from './settings.ts';
 import { reconcileAll, refreshChanged, refreshMonth } from './ingest.ts';
-import { bucketOf, BUCKETS, DEFAULT_MAPPING, suggest, summarize, type Line } from '../calc/bwa.ts';
+import { bucketOf, BUCKETS, checkReport, DEFAULT_MAPPING, pdfLines, suggest, summarize, type Line } from '../calc/bwa.ts';
 import { resolveFirm } from '../calc/extract.ts';
 import { toCsv } from './export.ts';
 import { sha256Hex } from '../api/guard.ts';
 
 const SECURITY = {
   'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
-  'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'",
 };
 const reply = (data: unknown, status = 200, extra: Record<string, string> = {}) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', ...SECURITY, ...extra } });
@@ -66,6 +68,38 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     const y = Number(q.get('year'));
     if (!Number.isInteger(y) || y < 2020 || y > 2100) throw new HttpError(400, 'Ungültiges Jahr.');
     return reply(await yearReport(env, who, y));
+  }
+
+  if (p === '/api/overview-calendar' && method === 'GET') {
+    const y = Number(q.get('year'));
+    if (!Number.isInteger(y) || y < 2020 || y > 2100) throw new HttpError(400, 'Ungültiges Jahr.');
+    return reply(await overviewCalendar(env, y));
+  }
+
+  if (p === '/api/project-roster' && method === 'GET') return reply(await projectRoster(env));
+  // order value per project, shared by everyone instead of living in one browser
+  if (p === '/api/project-order' && method === 'PUT') {
+    need(can.costs(who));
+    const b = await body<{ projectId: string; cents: number | null }>();
+    const id = text(b.projectId, 80);
+    if (b.cents === null) await env.DB.prepare('DELETE FROM project_order WHERE project_id = ?').bind(id).run();
+    else {
+      if (!Number.isSafeInteger(b.cents) || b.cents <= 0) throw new HttpError(400, 'Auftragswert muss ein positiver Betrag sein.');
+      await env.DB.prepare('INSERT INTO project_order (project_id, cents, updated_by, updated_at) VALUES (?,?,?,?) ON CONFLICT(project_id) DO UPDATE SET cents = excluded.cents, updated_by = excluded.updated_by, updated_at = excluded.updated_at').bind(id, b.cents, who.email, new Date().toISOString()).run();
+    }
+    await log(env, who, 'project-order', `${id} ${b.cents}`);
+    return reply({ ok: true });
+  }
+  if (p === '/api/employee-calendar' && method === 'GET') {
+    const y = Number(q.get('year'));
+    if (!Number.isInteger(y) || y < 2020 || y > 2100) throw new HttpError(400, 'Ungültiges Jahr.');
+    return reply(await employeeCalendar(env, y));
+  }
+  if (p === '/api/employee-absences-today' && method === 'GET') return reply(await employeesAbsentToday(env));
+  if (p === '/api/sub-calendar' && method === 'GET') {
+    const y = Number(q.get('year'));
+    if (!Number.isInteger(y) || y < 2020 || y > 2100) throw new HttpError(400, 'Ungültiges Jahr.');
+    return reply(await subCalendar(env, y));
   }
 
   if (p === '/api/trace' && method === 'GET') {
@@ -198,15 +232,20 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     return reply({ version });
   }
   if (p === '/api/bwa' && method === 'GET') {
-    const rows = await env.DB.prepare('SELECT id, kind, period, version, filename, source_format, mapping_version, imported_by, imported_at, status, unmapped FROM bwa_import WHERE period = ? ORDER BY kind, version DESC').bind(month(q.get('period'))).all();
+    const rows = await env.DB.prepare('SELECT id, kind, period, version, filename, source_format, mapping_version, imported_by, imported_at, status, unmapped, edited_at FROM bwa_import WHERE period = ? ORDER BY kind, version DESC').bind(month(q.get('period'))).all();
     return reply(rows.results);
   }
   if (p === '/api/bwa/import' && method === 'POST') {
     need(can.bwa(who));
-    const b = await body<{ kind: string; period: string; filename: string; format: string; lines: Line[]; file?: string }>();
+    const b = await body<{ kind: string; period: string; filename: string; format: string; lines: Line[]; file?: string; report?: unknown }>();
     if (b.kind !== 'bwa' && b.kind !== 'susa') throw new HttpError(400, 'Ungültiger Typ.');
-    if (!Array.isArray(b.lines) || !b.lines.length || b.lines.length > 5000) throw new HttpError(400, 'Keine Zeilen erkannt.');
     const per = month(b.period);
+    // a parsed PDF report is the source; the review lines are derived from it
+    let report = '';
+    if (b.report !== undefined) {
+      try { const rep = checkReport(b.report, b.kind, per); report = JSON.stringify(rep); b.lines = pdfLines(rep); } catch (e) { throw new HttpError(400, (e as Error).message); }
+    }
+    if (!Array.isArray(b.lines) || !b.lines.length || b.lines.length > 5000) throw new HttpError(400, 'Keine Zeilen erkannt.');
     const map = await mappingRows(env);
     const last = await env.DB.prepare('SELECT MAX(version) AS v FROM bwa_import WHERE kind = ? AND period = ?').bind(b.kind, per).first<{ v: number | null }>();
     const id = crypto.randomUUID(), version = (last?.v ?? 0) + 1;
@@ -216,12 +255,13 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
       fileKey = `bwa/${per}/${b.kind}-v${version}-${id}`;
       await env.BUCKET.put(fileKey, Uint8Array.from(atob(b.file), (c) => c.charCodeAt(0)), { customMetadata: { filename: b.filename } });
     }
-    const lines = b.lines.map((l) => ({ account: String(l.account || '').slice(0, 12), label: String(l.label || '').slice(0, 200), cents: cents(l.cents) }));
-    const mapped = lines.map((l) => ({ ...l, bucket: bucketOf(l, map.rows) }));
+    const lines = b.lines.map((l) => ({ account: String(l.account || '').slice(0, 12), label: String(l.label || '').slice(0, 200), cents: cents(l.cents), hint: (BUCKETS as readonly string[]).includes(l.bucket ?? '') ? l.bucket! : '' }));
+    // the saved mapping decides; the file's own hint only fills what it does not know
+    const mapped = lines.map((l) => ({ ...l, bucket: bucketOf(l, map.rows) || l.hint }));
     const unmapped = mapped.filter((l) => !l.bucket).length;
     await env.DB.batch([
-      env.DB.prepare('INSERT INTO bwa_import (id, kind, period, version, file_key, filename, source_format, mapping_version, imported_by, imported_at, status, unmapped) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-        .bind(id, b.kind, per, version, fileKey, text(b.filename, 200), text(b.format, 20), map.version, who.email, new Date().toISOString(), 'review', unmapped),
+      env.DB.prepare('INSERT INTO bwa_import (id, kind, period, version, file_key, filename, source_format, mapping_version, imported_by, imported_at, status, unmapped, report) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
+        .bind(id, b.kind, per, version, fileKey, text(b.filename, 200), text(b.format, 20), map.version, who.email, new Date().toISOString(), 'review', unmapped, report || null),
       ...mapped.map((l) => env.DB.prepare('INSERT INTO bwa_line VALUES (?,?,?,?,?)').bind(id, l.account, l.label, l.cents, l.bucket)),
     ]);
     await log(env, who, 'bwa-import', `${b.kind} ${per} v${version}`);
@@ -233,6 +273,55 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     if (!imp) throw new HttpError(404, 'Import nicht gefunden.');
     const lines = await env.DB.prepare('SELECT rowid AS n, account, label, cents, bucket FROM bwa_line WHERE import_id = ? ORDER BY rowid').bind(bwaId[1]).all();
     return reply({ import: imp, lines: lines.results, buckets: BUCKETS });
+  }
+  if (bwaId && method === 'DELETE') {
+    need(can.bwa(who));
+    const imp = await env.DB.prepare('SELECT id, kind, period, version, file_key FROM bwa_import WHERE id = ?').bind(bwaId[1]).first<{ id: string; kind: string; period: string; version: number; file_key: string }>();
+    if (!imp) throw new HttpError(404, 'Import nicht gefunden.');
+    await env.DB.batch([env.DB.prepare('DELETE FROM bwa_line WHERE import_id = ?').bind(imp.id), env.DB.prepare('DELETE FROM bwa_import WHERE id = ?').bind(imp.id)]);
+    if (imp.file_key && env.BUCKET) await env.BUCKET.delete(imp.file_key);
+    await log(env, who, 'bwa-delete', `${imp.kind} ${imp.period} v${imp.version}`);
+    return reply({ ok: true });
+  }
+  // corrected amounts: allowed for any version, every change is logged with before and after
+  const bwaEdit = p.match(/^\/api\/bwa\/([\w-]+)\/lines$/);
+  if (bwaEdit && method === 'POST') {
+    need(can.bwa(who));
+    const b = await body<{ edits: { n: number; cents: number }[] }>();
+    if (!Array.isArray(b.edits) || !b.edits.length || b.edits.length > 500 || b.edits.some((e) => !Number.isInteger(e.n))) throw new HttpError(400, 'Keine gültigen Änderungen.');
+    const imp = await env.DB.prepare('SELECT id, kind, period, version, report FROM bwa_import WHERE id = ?').bind(bwaEdit[1]).first<{ id: string; kind: string; period: string; version: number; report: string | null }>();
+    if (!imp) throw new HttpError(404, 'Import nicht gefunden.');
+    if (imp.report) throw new HttpError(409, 'Dieser Import wird über die BWA-Tabelle korrigiert.');
+    const before = new Map((await env.DB.prepare('SELECT rowid AS n, label, cents FROM bwa_line WHERE import_id = ?').bind(imp.id).all<{ n: number; label: string; cents: number }>()).results.map((r) => [r.n, r]));
+    const changed = b.edits.filter((e) => before.has(e.n) && before.get(e.n)!.cents !== cents(e.cents));
+    if (!changed.length) return reply({ changed: 0 });
+    await env.DB.batch([
+      ...changed.map((e) => env.DB.prepare('UPDATE bwa_line SET cents = ? WHERE import_id = ? AND rowid = ?').bind(e.cents, imp.id, e.n)),
+      env.DB.prepare('UPDATE bwa_import SET edited_at = ? WHERE id = ?').bind(new Date().toISOString(), imp.id),
+    ]);
+    await log(env, who, 'bwa-edit', `${imp.kind} ${imp.period} v${imp.version}: ` + changed.map((e) => `${before.get(e.n)!.label} ${before.get(e.n)!.cents}->${e.cents}`).join('; ').slice(0, 900));
+    return reply({ changed: changed.length });
+  }
+  // BWA table correction: the corrected report replaces the stored one and the review lines follow it
+  const bwaFix = p.match(/^\/api\/bwa\/([\w-]+)\/report$/);
+  if (bwaFix && method === 'PUT') {
+    need(can.bwa(who));
+    const imp = await env.DB.prepare('SELECT id, kind, period, version, report FROM bwa_import WHERE id = ?').bind(bwaFix[1]).first<{ id: string; kind: string; period: string; version: number; report: string | null }>();
+    if (!imp || !imp.report) throw new HttpError(404, 'Import nicht gefunden.');
+    if (imp.kind !== 'bwa') throw new HttpError(400, 'Nur eine BWA kann korrigiert werden.');
+    const b = await body<{ report: unknown }>();
+    let rep;
+    try { rep = checkReport(b.report, 'bwa', imp.period); } catch (e) { throw new HttpError(400, (e as Error).message); }
+    const old = JSON.parse(imp.report) as { rows: { label: string; month: number | null; ytd: number | null; prior: number | null }[] };
+    if (old.rows.length !== (rep as { rows: unknown[] }).rows.length) throw new HttpError(400, 'Zeilen dürfen nicht hinzugefügt oder entfernt werden.');
+    const diff = (rep as { rows: { label: string; month: number | null; ytd: number | null; prior: number | null }[] }).rows.flatMap((r, i) => (['month', 'ytd', 'prior'] as const).filter((k) => r[k] !== old.rows[i][k] || r.label !== old.rows[i].label).map((k) => `${r.label} ${k} ${old.rows[i][k]}->${r[k]}`));
+    if (!diff.length) return reply({ changed: 0 });
+    const fresh = pdfLines(rep);
+    const stmts = [env.DB.prepare('UPDATE bwa_import SET report = ?, edited_at = ? WHERE id = ?').bind(JSON.stringify(rep), new Date().toISOString(), imp.id)];
+    for (const l of fresh) stmts.push(env.DB.prepare('UPDATE bwa_line SET cents = ? WHERE import_id = ? AND label = ?').bind(l.cents, imp.id, l.label));
+    await env.DB.batch(stmts);
+    await log(env, who, 'bwa-edit', `bwa ${imp.period} v${imp.version}: ${diff.join('; ')}`.slice(0, 900));
+    return reply({ changed: diff.length });
   }
   const bwaAct = p.match(/^\/api\/bwa\/([\w-]+)\/(map|accept)$/);
   if (bwaAct && method === 'POST') {
@@ -256,6 +345,14 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     ]);
     await log(env, who, 'bwa-accept', imp.id);
     return reply({ ok: true });
+  }
+  // accepted reports of the year and the year before, in the shape the browser calculations expect
+  if (p === '/api/accounting-reports' && method === 'GET') {
+    need(can.costs(who));
+    const y = Number(q.get('year'));
+    if (!Number.isInteger(y) || y < 2020 || y > 2100) throw new HttpError(400, 'Ungültiges Jahr.');
+    const rows = await env.DB.prepare("SELECT filename, source_format, imported_at, edited_at, report FROM bwa_import WHERE status = 'accepted' AND report IS NOT NULL AND period >= ? AND period <= ?").bind(`${y - 1}-01`, `${y}-12`).all<{ filename: string; source_format: string; imported_at: string; edited_at: string | null; report: string }>();
+    return reply(rows.results.map((r) => ({ ...JSON.parse(r.report), name: r.filename, importedAt: r.imported_at, ocr: r.source_format === 'pdf-ocr', ...(r.edited_at ? { editedAt: r.edited_at } : {}) })));
   }
   if (p === '/api/bwa-compare' && method === 'GET') {
     const per = month(q.get('period'));
@@ -290,6 +387,32 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
   }
 
   // ---- exports
+  if (p === '/api/export' && method === 'GET' && q.get('what') === 'overview-days') {
+    const y = Number(q.get('year')), mo = q.get('month');
+    if (!Number.isInteger(y) || y < 2020 || y > 2100 || (mo !== null && (!MONTH.test(mo) || !mo.startsWith(String(y))))) throw new HttpError(400, 'Ungültiger Zeitraum.');
+    const eur = (c: number | null) => (c === null ? '' : (c / 100).toFixed(2).replace('.', ','));
+    const rows: (string | number)[][] = [['Tag', 'Umsatz Monteur', 'Umsatz Obermonteur', 'Umsatz Nachunternehmer', 'Gesamt', 'Koepfe', 'Umsatz je Kopf Mitarbeiter', 'Umsatz je Kopf Nachunternehmer', 'Soll-Ist je Kopf'],
+      ...(await overviewCalendar(env, y)).daily.filter((d) => (!mo || d.day.startsWith(mo)) && (d.hasRevenue || d.heads)).map((d) => [d.day, eur(d.ownRoles.m.revenue), eur(d.ownRoles.om.revenue), eur(d.sub), eur(d.total), d.subHeadsMissing ? '' : d.heads, eur(d.ownPerHead), eur(d.subPerHead), eur(d.perHead !== null && d.target !== null ? d.perHead - d.target : null)])];
+    return new Response(toCsv(rows), { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="umsatz-${mo ?? y}.csv"`, ...SECURITY } });
+  }
+  if (p === '/api/export' && method === 'GET' && q.get('what') === 'employee-calendar') {
+    const y = Number(q.get('year')), mo = q.get('month');
+    if (!Number.isInteger(y) || y < 2020 || y > 2100 || (mo !== null && (!MONTH.test(mo) || !mo.startsWith(String(y))))) throw new HttpError(400, 'Ungültiger Zeitraum.');
+    const eur = (c: number | null) => (c === null ? '' : (c / 100).toFixed(2).replace('.', ','));
+    const hrs = (m: number | null) => (m === null ? '' : (m / 60).toFixed(2).replace('.', ','));
+    const rows: (string | number)[][] = [['Mitarbeiter', 'Umsatz 90 %', 'Ø Tagesumsatz', 'Arbeitsstunden', 'Ø Arbeitsstunden pro Tag', 'U', 'UU', 'K'],
+      ...employeePeriod(await employeeCalendar(env, y), mo).map((r) => [r.name, eur(r.revenue), eur(r.averageRevenue), hrs(r.minutes), hrs(r.averageMinutes), r.absences.vacation, r.absences.unpaid, r.absences.sick])];
+    return new Response(toCsv(rows), { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="mitarbeiter-${mo ?? y}.csv"`, ...SECURITY } });
+  }
+  if (p === '/api/export' && method === 'GET' && q.get('what') === 'sub-calendar') {
+    const y = Number(q.get('year')), mo = q.get('month');
+    if (!Number.isInteger(y) || y < 2020 || y > 2100 || (mo !== null && (!MONTH.test(mo) || !mo.startsWith(String(y))))) throw new HttpError(400, 'Ungültiger Zeitraum.');
+    const eur = (c: number | null) => (c === null ? '' : (c / 100).toFixed(2).replace('.', ','));
+    const firms = subCalendarFirms((await subCalendar(env, y)).filter((r) => !mo || r.day.startsWith(mo)));
+    const rows: (string | number)[][] = [['Nachunternehmer', 'Umsatz', 'Kosten', 'Gewinn', 'Personentage', 'Ø Tagessatz', 'Ø Kosten je Personentag', 'Ø Gewinn je Personentag', 'Tage', 'Projekte'],
+      ...firms.map((r) => [r.firm, eur(r.revenue), eur(r.cost), eur(r.profit), r.personDays, eur(r.averageRevenue), eur(r.averageCost), eur(r.averageProfit), r.days, r.projects])];
+    return new Response(toCsv(rows), { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="nachunternehmer-${mo ?? y}.csv"`, ...SECURITY } });
+  }
   if (p === '/api/export' && method === 'GET') {
     const m = month(q.get('month'));
     const r = await monthReport(env, who, m);

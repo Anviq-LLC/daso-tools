@@ -1,0 +1,26 @@
+name: aufmass-ci
+on:
+  push:
+    branches: [main]
+    paths: ['apps/aufmass/**', '.github/workflows/aufmass-ci.yml']
+  pull_request:
+    paths: ['apps/aufmass/**', '.github/workflows/aufmass-ci.yml']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/aufmass
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/aufmass/pnpm-lock.yaml
+      - run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test

@@ -1,9 +1,33 @@
 // Forecasts are labelled as such and never mixed into booked actuals.
+import { holidaysRP } from './holidays.ts';
+
 const dow = (d: string) => new Date(d + 'T12:00:00Z').getUTCDay();
 const daysIn = (month: string) => {
   const [y, m] = month.split('-').map(Number);
   return Array.from({ length: new Date(Date.UTC(y, m, 0)).getUTCDate() }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`);
 };
+
+const dayMs = 86_400_000;
+function closureStart(year: number) {
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const weekday = (jan4.getUTCDay() + 6) % 7;
+  return jan4.getTime() + (51 * 7 - weekday) * dayMs;
+}
+
+// Two complete ISO weeks starting in KW 52, including the weekend.
+export function isWinterClosure(day: string) {
+  const year = Number(day.slice(0, 4));
+  const date = Date.parse(day + 'T00:00:00Z');
+  return [closureStart(year - 1), closureStart(year)].some(start => date >= start && date < start + 14 * dayMs);
+}
+
+export function adjustForWinterClosure(month: string, monthlyEstimate: number | null) {
+  if (monthlyEstimate === null || !['01', '12'].includes(month.slice(5))) return monthlyEstimate;
+  const holidays = holidaysRP(Number(month.slice(0, 4)));
+  const weekdays = daysIn(month).filter(day => dow(day) >= 1 && dow(day) <= 5 && !holidays[day]);
+  const open = weekdays.filter(day => !isWinterClosure(day)).length;
+  return weekdays.length ? Math.round(monthlyEstimate * open / weekdays.length) : monthlyEstimate;
+}
 
 export type MonthForecast = {
   ist: number; forecast: number; avgWeekday: number | null; remainingWeekdays: number; remainingSaturdays: number;
@@ -20,9 +44,9 @@ export function forecastMonth(opts: {
     const v = opts.revenueByDay[d] || 0;
     if (d > opts.asOf) continue;
     ist += v;
-    if (dow(d) >= 1 && dow(d) <= 5 && v > 0) { sum += v; n++; }
+    if (dow(d) >= 1 && dow(d) <= 5 && v > 0 && !isWinterClosure(d)) { sum += v; n++; }
   }
-  const future = days.filter((d) => d > opts.asOf);
+  const future = days.filter((d) => d > opts.asOf && !isWinterClosure(d));
   const remainingWeekdays = future.filter((d) => dow(d) >= 1 && dow(d) <= 5 && !opts.holidays.has(d)).length;
   const remainingSaturdays = future.filter((d) => dow(d) === 6).length;
   const avg = n ? Math.round(sum / n) : null;
@@ -31,6 +55,7 @@ export function forecastMonth(opts: {
     avg === null ? 'Keine Umsatztage im Monat: Prognose entspricht dem Ist.' : `Durchschnitt produktiver Werktage (${n} Tage) auf ${remainingWeekdays} verbleibende Werktage ohne Feiertage.`,
     `Samstage separat: ${remainingSaturdays} verbleibende x ${(opts.saturdayCents / 100).toFixed(2)} EUR (einstellbare Annahme).`,
   ];
+  if (days.some(day => day > opts.asOf && isWinterClosure(day))) assumptions.push('Betriebsschließung ab KW 52: zwei Wochen ohne zusätzlichen Umsatz.');
   return { ist, forecast, avgWeekday: avg, remainingWeekdays, remainingSaturdays, productiveDays: n, assumptions };
 }
 
@@ -49,8 +74,8 @@ export function forecastYear(year: number, today: string, revenue: Record<string
   const mean = known.length ? Math.round(known.reduce((a, b) => a + b, 0) / known.length) : 0;
   for (let m = 1; m <= 12; m++) {
     const key = `${year}-${String(m).padStart(2, '0')}`;
-    if (key > cur) points.push({ month: key, kind: 'hochrechnung', revenue: mean });
+    if (key > cur) points.push({ month: key, kind: 'hochrechnung', revenue: adjustForWinterClosure(key, mean) ?? 0 });
   }
   points.sort((a, b) => a.month.localeCompare(b.month));
-  return { points, total: points.reduce((s, p) => s + p.revenue, 0), note: 'Restmonate = Mittel der bisherigen Monate, ohne Saisonannahme. Keine BWA.' };
+  return { points, total: points.reduce((s, p) => s + p.revenue, 0), note: 'Restmonate = Mittel der bisherigen Monate, angepasst an die Betriebsschließung. Keine BWA.' };
 }
