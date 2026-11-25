@@ -1,0 +1,120 @@
+.employee-print-only { display: none; }
+
+@page employee-month {
+  size: A4 portrait;
+  margin: 12mm 13mm;
+}
+
+@media print {
+  .employee-print-button { display: none; }
+
+  body.employee-month-print {
+    page: employee-month;
+    --panel: #fff;
+    --ink: #17233a;
+    --muted: #4d5a70;
+    --line: #d7dfeb;
+    --head: #edf1f8;
+    --err: #9b2c3d;
+    color: var(--ink);
+    font: 9pt/1.35 Arial, sans-serif;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  body.employee-month-print main > :not(.month-page),
+  body.employee-month-print .month-page > :not(.detail),
+  body.employee-month-print .detail .warnlist,
+  body.employee-month-print .detail [role="status"],
+  body.employee-month-print .detail [role="alert"],
+  body.employee-month-print .employee-print-hide { display: none; }
+
+  body.employee-month-print main { padding: 0; }
+  body.employee-month-print .detail { max-width: none; margin: 0; padding: 0; border: 0; }
+  body.employee-month-print :is(header, section).employee-print-only { display: block; }
+  body.employee-month-print span.employee-print-only { display: inline; }
+
+  .employee-print-heading { break-inside: avoid; }
+  .employee-print-contact {
+    display: flex;
+    align-items: center;
+    gap: 4mm;
+    border-bottom: 2pt solid #492ade;
+    padding-bottom: 2mm;
+    margin-bottom: 4mm;
+    font-weight: 700;
+  }
+  .employee-print-contact img { display: block; width: 29mm; height: auto; }
+  .employee-print-heading h1 {
+    font-size: 24pt;
+    line-height: 1.12;
+    letter-spacing: -.4pt;
+    margin: 0 0 2mm;
+  }
+  .employee-print-period {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4mm;
+    margin-bottom: 4mm;
+    font-size: 12pt;
+  }
+  .employee-print-period span { color: var(--muted); white-space: nowrap; }
+  .employee-print-figures {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    margin: 0 0 4mm;
+    border: .5pt solid var(--line);
+    border-top: 2pt solid #f5a845;
+    background: #f6f8fb;
+  }
+  .employee-print-figures > div { padding: 2.5mm 3mm; }
+  .employee-print-figures > div + div { border-left: .5pt solid var(--line); }
+  .employee-print-figures dt { color: var(--muted); font-size: 8.25pt; }
+  .employee-print-figures dd { margin: .75mm 0 0; font-weight: 700; font-size: 12pt; font-variant-numeric: tabular-nums; }
+  .employee-print-gross dd { color: #4127c5; }
+
+  body.employee-month-print .detail h3 {
+    break-after: avoid;
+    margin: 0 0 2mm;
+    font-size: 12pt;
+    color: #34278a;
+  }
+  body.employee-month-print .employee-calendar-heading { display: block; break-after: avoid; }
+  body.employee-month-print .detail :is(th, td) {
+    position: static;
+    padding: 1mm 2mm;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    border-bottom: .5pt solid var(--line);
+    vertical-align: top;
+  }
+  body.employee-month-print .detail :is(th, td).num { white-space: nowrap; }
+  body.employee-month-print .detail thead th { background: var(--head); color: var(--ink); font-size: 8pt; }
+  body.employee-month-print .detail tr { break-inside: avoid; }
+  body.employee-month-print .detail tfoot { display: table-row-group; color: #34278a; background: #f6f8fb; }
+  body.employee-month-print .detail tfoot :is(th, td) { border-top: .5pt solid var(--line); }
+  body.employee-month-print .detail tfoot tr:first-child :is(th, td) { border-top: 1pt solid #6b599b; }
+  body.employee-month-print .cal { table-layout: fixed; font-size: 8.5pt; }
+  body.employee-month-print .cal :is(th, td) { padding: .8mm 1.7mm; line-height: 1.23; }
+  body.employee-month-print .cal-date-col { width: 11%; }
+  body.employee-month-print .cal-hours-col { width: 10%; }
+  body.employee-month-print .cal-status-col { width: 19%; }
+  body.employee-month-print .cal-revenue-col { width: 15%; }
+  body.employee-month-print .cal thead th.num { white-space: normal; overflow-wrap: normal; }
+  body.employee-month-print .cal td.num small { font-size: 7.5pt; }
+  body.employee-month-print .cal tr.cal-saturday td.num small { display: block; }
+  body.employee-month-print .employee-calendar .cal tr:nth-child(even) { background: #f9fafc; }
+  body.employee-month-print .employee-calendar .cal tr.cal-saturday { background: #eaf6fa; }
+  body.employee-month-print .employee-calendar .cal tbody th { white-space: nowrap; }
+  body.employee-month-print .employee-calendar .cal .error th { color: var(--ink); }
+  body.employee-month-print .employee-calendar .cal :is(.gap, .error) td { background: transparent; color: var(--ink); }
+  body.employee-month-print .employee-calendar .cal .error .cal-note { color: var(--err); }
+  body.employee-month-print .detail .copy-hint { padding: 0; border: 0; color: inherit; }
+  body.employee-month-print .detail .muted { color: var(--muted); }
+  body.employee-month-print :is(.revenue-bonus, .employee-print-pay-lines) { margin-top: 4mm; }
+  body.employee-month-print .bonus-columns { grid-template-columns: 1.25fr 1fr; gap: 3mm; break-inside: avoid; }
+  body.employee-month-print :is(.bonus-tiers, .employee-print-pay-lines) { break-inside: avoid; }
+  body.employee-month-print .bonus-calculation-note { font-size: 8pt; }
+}

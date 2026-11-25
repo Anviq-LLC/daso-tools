@@ -1,0 +1,57 @@
+.tax-print-sheet { display: none; }
+.payroll-employee-form { align-items: end; margin-bottom: 16px; }
+.payroll-employee-form label { display: grid; gap: 3px; }
+
+@page tax-payroll {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  main:has(> .payroll-page) { padding: 0; max-width: none; }
+  main:has(> .payroll-page) > :not(.payroll-page),
+  .payroll-page > :not(.tax-print-sheet) { display: none; }
+  .payroll-page > .tax-print-sheet {
+    page: tax-payroll;
+    display: block;
+    color: #15233a;
+    font: 7.25pt/1.25 Arial, sans-serif;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .tax-print-heading { padding-bottom: 2mm; margin-bottom: 2.5mm; border-bottom: 1pt solid #492ade; break-after: avoid; }
+  .tax-print-heading h1 { font-size: 16pt; margin: 0 0 1mm; }
+  .tax-print-heading p { display: flex; justify-content: space-between; margin: 0; font-size: 8.5pt; }
+  .tax-print-heading span { color: #4d5a70; }
+  .tax-print-table { width: 100%; table-layout: fixed; background: #fff; }
+  .tax-print-name { width: 11%; }
+  .tax-print-quantity { width: 3.6%; }
+  .tax-print-money { width: 3.95%; }
+  .tax-print-brutto { width: 4.8%; }
+  .tax-print-days { width: 3.5%; }
+  .tax-print-table :is(th, td) {
+    position: static;
+    padding: 1mm .5mm;
+    border: .4pt solid #c4cfe1;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+  .tax-print-table thead { display: table-header-group; }
+  .tax-print-table thead th { color: #15233a; background: #e8edf8; font-size: 6.75pt; hyphens: auto; }
+  .tax-print-table tbody tr:nth-child(even) { background: #f6f8fb; }
+  .tax-print-table tfoot { display: table-row-group; color: #332488; background: #edf1f8; }
+  .tax-print-table tfoot .num { padding-inline: .28mm; font-size: 6.4pt; letter-spacing: -.08pt; white-space: nowrap; }
+  .tax-print-table tr { break-inside: avoid; }
+  .tax-print-table small { display: block; color: #4d5a70; font-size: 6pt; font-weight: normal; }
+  .tax-print-absences {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3mm;
+    margin-top: 4mm;
+    break-inside: avoid;
+  }
+  .tax-print-absences > div { border-top: .8pt solid #9dadd0; padding-top: 1.4mm; }
+  .tax-print-absences h2 { margin: 0 0 1mm; font-size: 8.25pt; }
+  .tax-print-absences p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+}

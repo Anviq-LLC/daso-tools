@@ -54,9 +54,9 @@ test.describe('app', () => {
     await expect(table.getByRole('row', { name: /Anna Test/ })).toBeVisible();
     await expect(table.getByRole('row', { name: /Cem Muster/ })).toBeVisible();
     await expect(table.getByText('Altfall Archiv')).toHaveCount(0);
-    await expect(table.getByRole('row', { name: /Ben Beispiel/ })).toContainText('3.606,56');
+    await expect(table.getByRole('row', { name: /Ben Beispiel/ })).toContainText('3.706,56');
     // Anna: Feb 8 job plus a report written on 4 March for work on 25 Feb
-    await expect(table.getByRole('row', { name: /Anna Test/ })).toContainText('18.000,00');
+    await expect(table.getByRole('row', { name: /Anna Test/ })).toContainText('22.500,00');
     await expect(page.locator('details.warn')).toHaveCount(0);
     expect(await overflow(page)).toBeLessThanOrEqual(0);
     await shot(page, '01-month-desktop');
@@ -71,11 +71,11 @@ test.describe('app', () => {
     await expect(detail).toContainText('Werkzeugrate');
     await expect(detail.getByLabel('Monatsansicht Ben Beispiel')).toContainText('Summe');
     await expect(detail.getByLabel('Monatsansicht Ben Beispiel').locator('thead th').first()).toHaveCSS('position', 'static');
-    await detail.getByLabel('Bezeichnung').fill('Rückbuchung Januar');
-    await detail.getByLabel('Betrag').fill('-50,00');
-    await detail.getByRole('button', { name: 'Erfassen' }).click();
-    await expect(detail).toContainText('Rückbuchung Januar');
-    await expect(detail).toContainText('-50,00');
+    const bonus = detail.getByRole('textbox', { name: 'Korrektur Umsatzbonus Vormonat' });
+    await bonus.fill('50,00');
+    await bonus.blur();
+    await expect(detail.getByRole('status')).toHaveText('Umsatzbonus-Korrektur gespeichert.');
+    await expect(bonus).toHaveValue('50,00');
     await shot(page, '02-detail');
   });
 
@@ -102,17 +102,31 @@ test.describe('app', () => {
     await expect(page.getByTestId('month-table')).toBeVisible();
   });
 
-  test('external week and tool account', async ({ page }) => {
+  test('Werkzeugkonten zeigen alle Mitarbeiter und lassen sich direkt bearbeiten', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Werkzeug und Extern' }).click();
-    await page.getByLabel('Monat').fill('2027-02');
-    const form = page.getByRole('form', { name: 'Woche erfassen' });
-    await form.getByLabel('KW').fill('2027-W06');
-    await form.getByLabel('Stunden').fill('40');
-    await form.getByLabel('Rechnung netto').fill('1.680,00');
-    await form.getByRole('button', { name: 'Erfassen' }).click();
-    await expect(page.getByRole('row', { name: /KW 06/ })).toContainText('80,00');
+    await page.getByRole('button', { name: 'Mitarbeiter', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Werkzeug und Extern' })).toHaveCount(0);
+    const table = page.getByRole('table', { name: 'Werkzeugkonten' });
+    for (const name of ['Anna Test', 'Ben Beispiel', 'Cem Muster']) {
+      await expect(table.getByRole('row', { name: new RegExp(name) })).toBeVisible();
+    }
+    await expect(table.getByRole('button', { name: 'Werkzeugkonto Cem Muster anlegen' })).toBeVisible();
+    await table.getByRole('button', { name: 'Werkzeugkonto Ben Beispiel bearbeiten' }).click();
+    const form = table.getByRole('form', { name: 'Werkzeugkonto Ben Beispiel' });
+    await expect(form.getByLabel(/Monatsrate/)).toHaveValue('50,00');
+    await form.getByLabel(/Vorab bezahlt/).fill('100,00');
+    await form.getByRole('button', { name: 'Werkzeugkonto speichern' }).click();
+    await expect(form).toHaveCount(0);
+    await expect(table.getByRole('row', { name: /Ben Beispiel/ })).toContainText('500,00');
+    const ownTools = table.getByRole('checkbox', { name: 'Eigenes Werkzeug mitgebracht Ben Beispiel' });
+    await ownTools.click();
+    await expect(ownTools).toBeChecked();
+    await page.reload();
+    await page.getByRole('button', { name: 'Mitarbeiter', exact: true }).click();
+    await expect(ownTools).toBeChecked();
     await shot(page, '05-tools');
+    await ownTools.click();
+    await expect(ownTools).not.toBeChecked();
   });
 
   test('release freezes the month', async ({ page, api: request }) => {
@@ -167,13 +181,13 @@ test('payroll sheet shows computed brutto and keeps typed values', async ({ page
   await page.getByRole('button', { name: 'Lohnabrechnung' }).click();
   await page.getByLabel('Monat').fill('2027-02');
   const row = page.getByTestId('payroll-table').getByRole('row', { name: /Ben Beispiel/ });
-  await expect(row).toContainText('3.814,04');
+  await expect(row).toContainText('4.014,04');
   await row.getByLabel('Fitness Ben Beispiel').fill('59,99');
   await row.getByLabel('Fitness Ben Beispiel').blur();
   await expect(page.getByLabel('Fitness Ben Beispiel')).toHaveValue('59,99');
   await page.getByLabel('Grundgehalt Ben Beispiel').fill('4.000,00');
   await page.getByLabel('Grundgehalt Ben Beispiel').blur();
-  await expect(page.getByTestId('payroll-table').getByRole('row', { name: /Ben Beispiel/ })).toContainText('6.850,00');
+  await expect(page.getByTestId('payroll-table').getByRole('row', { name: /Ben Beispiel/ })).toContainText('7.050,00');
   await shot(page, '08-payroll');
 });
 
@@ -207,7 +221,7 @@ test('every tab fits a phone and a laptop without sideways page scroll', async (
     const page = await ctx.newPage();
     await page.goto('/');
     await page.getByLabel('Monat').fill('2027-02');
-    for (const tab of ['Monat', 'Lohnabrechnung', 'Mitarbeiter', 'Werkzeug und Extern', 'Einstellungen', 'Protokoll', 'Zugänge']) {
+    for (const tab of ['Monat', 'Lohnabrechnung', 'Mitarbeiter', 'Einstellungen', 'Protokoll', 'Zugänge']) {
       await page.getByRole('button', { name: tab, exact: true }).click();
       await expect(page.getByRole('heading').first().or(page.getByTestId('month-table'))).toBeVisible();
       expect(await overflow(page), `${name} ${tab}`).toBeLessThanOrEqual(0);

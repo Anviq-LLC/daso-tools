@@ -1,10 +1,10 @@
 // @ts-nocheck
 // Synced copy, run "pnpm sync:aufmass" to refresh. Do not edit.
 import type { Aggregate, Data, Line, Project, Report, ReportKind, EmployeeMember } from './types';
+import {workerRate} from './team-members';
 import {employeeTeamCode} from './employees';
 import {reportCrews,crewWorkers,measurementHoursIssues} from './report-crews';
 import {isTimeReport,lineCustomerValue,reportDays,reportKind,timeCost,timePricingComplete,timeReportBounds,timeRevenueAvailable} from './time-reports';
-export const requiresCumulative=(project:Pick<Project,'requiresCumulative'>)=>project.requiresCumulative!==false;
 export const money = (cents: number) => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(cents/100);
 export const qty2 = (value:number)=>new Intl.NumberFormat('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value);
 export const qty = (value: number) => new Intl.NumberFormat('de-DE',{maximumFractionDigits:4}).format(value);
@@ -54,7 +54,7 @@ export function employeeTurnover(reports:Report[],fallbackFactor=.9,includeIncom
  const ranked=[...values].sort((a,b)=>b.employee-a.employee||a.employeeId.localeCompare(b.employeeId));let remaining=Math.abs(correction);while(remaining>0&&ranked.length){let changed=false;for(const member of ranked){if(correction<0&&member.employee<=0)continue;member.employee+=correction<0?-1:1;changed=true;if(--remaining===0)break;}if(!changed)break;}
  return values.sort((a,b)=>a.name.localeCompare(b.name,'de'));
 }
-export function reportCost(report:Report):number|null{if(report.crews?.length){const costs=crewReports(report).filter(r=>r.teamWork).map(reportCost);return !costs.length||costs.some(c=>c===null)?null:costs.reduce<number>((s,c)=>s+c!,0);}if(isTimeReport(report))return timeCost(report);if(measurementHoursIssues(report).length)return null;const work=report.teamWork;if(!work||typeof work.hourlyRate!=='number'||!Number.isSafeInteger(work.hourlyRate)||work.hourlyRate<0||!work.workers.length||work.workers.some(w=>typeof w.hours!=='number'||!Number.isFinite(w.hours)||w.hours<0))return null;return decimalValue(work.workers.map(w=>({customer:work.hourlyRate!,factor:w.hours!})));}
+export function reportCost(report:Report):number|null{if(report.crews?.length){const costs=crewReports(report).filter(r=>r.teamWork).map(reportCost);return !costs.length||costs.some(c=>c===null)?null:costs.reduce<number>((s,c)=>s+c!,0);}if(isTimeReport(report))return timeCost(report);if(measurementHoursIssues(report).length)return null;const work=report.teamWork;if(!work||!work.workers.length||work.workers.some(w=>{const r=workerRate(work,w);return typeof r!=='number'||!Number.isSafeInteger(r)||r<0||typeof w.hours!=='number'||!Number.isFinite(w.hours)||w.hours<0;}))return null;return decimalValue(work.workers.map(w=>({customer:workerRate(work,w)!,factor:w.hours!})));}
 export function teamResult(reports:Report[],fallbackFactor=.9){
  const value=reportTotals(reports,fallbackFactor);
  // Own employees have no internal cost rate. They must not hide the costs
@@ -103,8 +103,7 @@ export function aggregateTotals(rows:Aggregate[],fallbackFactor=.9){return{custo
 export function normalizeFinancialData(data:Data):Data{
  const factors=new Map(data.projects.map(p=>[p.id,p.factor]));
  const reports=data.reports.map(r=>({...r,lines:r.lines.map(l=>({...l,employeeFactor:l.employeeFactor??factors.get(r.projectId)??.9}))}));
- const closures=data.closures.map(c=>{const map=new Map<string,Aggregate>();for(const original of c.rows){const employeeFactor=original.employeeFactor??factors.get(c.projectId)??.9,key=aggregateKey({...original,employeeFactor}),prior=map.get(key);map.set(key,{...original,key,employeeFactor,quantity:(prior?.quantity||0)+original.quantity,customerValue:(prior?.customerValue||0)+original.customerValue});}const rows=[...map.values()].map(row=>({...row,employeeValue:employeeValue([{customer:row.customerValue,factor:row.employeeFactor!}])}));return{...c,rows,employeeValue:aggregateTotals(rows).employee};});
- return{...data,reports,closures};
+ return{...data,reports};
 }
 export function deadlineFrom(date:string,days:number,working:boolean){const d=new Date(date.slice(0,10)+'T12:00:00Z');for(let n=0;n<days;){d.setUTCDate(d.getUTCDate()+1);if(!working||d.getUTCDay()!==0)n++;}return d.toISOString().slice(0,10);}
 export const defaultTemplate = `Sehr geehrte Damen und Herren,\n\nanbei senden wir Ihnen die aktuellen Aufmaße aus {{kw}} zu.\n\nSollten Sie Fragen haben oder Anpassungen bzw. Kürzungen vornehmen, wenden Sie sich bitte vorab an unseren Kollegen {{kontakt}}.\n\nGenerelle Empfehlung von uns nach VOB/B § 2 Abs. 2 ist das Aufmaß Basis der Vergütung und soll nach § 14 Nr. 2 VOB/B möglichst gemeinsam vom Auftragnehmer und Auftraggeber vorgenommen werden.\n\nKürzungen ohne Angabe von Gründen bzw. Freigabe von unserem Obermonteur sind nicht zulässig. Klare Rechenfehler sind hiervon ausgenommen.\n\nBitte senden Sie uns das Aufmaß innerhalb der vertraglichen Frist per E-Mail zurück.\n\nNach Ablauf der vertraglich vereinbarten Prüffrist werden wir die erfassten Leistungen auf Grundlage der vertraglichen Vereinbarungen abrechnen. Bitte teilen Sie uns Einwendungen innerhalb dieser Frist schriftlich und positionsbezogen mit.`;

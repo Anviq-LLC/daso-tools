@@ -1,60 +1,111 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api, eur, fromCents, toCents, type MonthView } from './api.ts';
+import { api, eur, hours, type MonthView } from './api.ts';
 import type { Settings, Terms } from '../calc/month.ts';
 import { MoneyInput } from './MoneyInput.tsx';
+import { ToolAccounts } from './ToolAccounts.tsx';
 
-type TermsRow = Terms & { id: string };
+type TermsRow = Terms & { id: string; groupSince?: string | null; nextGroup?: { from: string; group: number | null; sub: boolean } | null };
 
-export function EmployeesPage({ month }: { month: string }) {
+const germanDate = (day: string) => day.split('-').reverse().join('.');
+
+export function EmployeesPage({ month, setMonth }: { month: string; setMonth: (month: string) => void }) {
   const [rows, setRows] = useState<TermsRow[]>([]);
-  const [rates, setRates] = useState<Record<number, number>>({});
+  const [edits, setEdits] = useState<Record<string, Partial<Terms>>>({});
+  const [report, setReport] = useState<MonthView | null>(null);
   const [from, setFrom] = useState(month + '-01');
   const [msg, setMsg] = useState('');
-  const load = useCallback(() => api<TermsRow[]>('/api/terms').then(setRows).catch((e) => setMsg(e.message)), []);
-  useEffect(() => { load(); api<Settings>('/api/settings').then((s) => setRates(s.rates)).catch(() => {}); }, [load]);
+  const [error, setError] = useState('');
+  const [reportError, setReportError] = useState('');
+  const [refresh, setRefresh] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const termsPath = '/api/terms?month=' + month;
+  useEffect(() => {
+    let active = true;
+    setRows([]); setEdits({}); setReport(null); setMsg(''); setError(''); setReportError('');
+    api<TermsRow[]>(termsPath).then(data => { if (active) setRows(data); })
+      .catch(e => { if (active) setError(e.message); });
+    api<MonthView>('/api/months/' + month).then(data => { if (active) setReport(data); })
+      .catch(e => { if (active) setReportError(e.message); });
+    return () => { active = false; };
+  }, [month, refresh, termsPath]);
   useEffect(() => setFrom(month + '-01'), [month]);
-  const set = (id: string, patch: Partial<Terms>) => setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+
+  const set = (id: string, patch: Partial<Terms>) => setEdits(changes => ({ ...changes, [id]: { ...changes[id], ...patch } }));
   const save = async (r: TermsRow) => {
-    setMsg('');
+    if (!from || saving) return;
+    const terms = edits[r.id];
+    if (!terms) return;
+    setSaving(true); setMsg(''); setError('');
     try {
-      await api('/api/terms', 'PUT', { resourceId: r.id, validFrom: from, terms: { ...r, bonus: true, saturday: true, fixedSalaryCents: null, sub: !!r.sub, subRateCents: r.sub ? r.subRateCents ?? null : null } });
-      setMsg(`Gespeichert für ${r.name}, gültig ab ${from.split('-').reverse().join('.')}.`);
-    } catch (e) { setMsg((e as Error).message); }
+      await api('/api/terms', 'PATCH', { resourceId: r.id, validFrom: from, terms });
+      setEdits(changes => Object.fromEntries(Object.entries(changes).filter(([id]) => id !== r.id)));
+      setMsg(`Gespeichert für ${r.name}, gültig ab ${germanDate(from)}.`);
+      setRows(await api<TermsRow[]>(termsPath));
+    } catch (e) { setError((e as Error).message); }
+    finally { setSaving(false); }
   };
+  const overview = new Map(report?.result.rows.map(row => [row.resourceId, row.overview]));
+  const number = (value: number | undefined) => value === undefined ? '–' : String(value);
+  const minutes = (value: number | undefined) => value === undefined ? '–' : hours(value);
   return (
     <section>
-      <h1>Mitarbeiter und Konditionen</h1>
+      <h1>Mitarbeiter</h1>
       <div className="toolbar">
-        <label>Änderungen gelten ab <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></label>
-        <span className="muted">Freigegebene Monate bleiben unverändert.</span>
+        <label>Monat <input type="month" value={month} disabled={saving} onChange={e => e.target.value && setMonth(e.target.value)} /></label>
+        <label>Änderungen gelten ab <input type="date" value={from} disabled={saving} onChange={e => setFrom(e.target.value)} /></label>
+        <button disabled={saving} onClick={() => setRefresh(value => value + 1)}>Aktualisieren</button>
       </div>
       {msg && <p role="status" className="muted">{msg}</p>}
-      <div className="scroll">
-        <table className="grid">
-          <thead><tr><th className="sticky">Name</th><th>Lohngruppe</th><th className="num">Stundensatz €/h</th><th>Zuschlag €/h</th><th>Obermonteur</th><th>Kostensatz €/h</th><th /></tr></thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id}>
-                <th scope="row" className="sticky">{r.name}</th>
-                <td><select aria-label={`Lohngruppe ${r.name}`} value={r.sub ? 'SUB' : r.lohngruppe ?? ''} onChange={(e) => { const v = e.target.value; set(r.id, v === 'SUB' ? { sub: true, lohngruppe: null } : { sub: false, lohngruppe: v ? Number(v) : null }); }}>
-                  <option value="">-</option>{[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => <option key={n} value={n}>LG {n}</option>)}<option value="SUB">SUB</option></select></td>
-                <td className="num">{r.sub
-                  ? <MoneyInput aria-label={`Stundensatz ${r.name}`} placeholder="z. B. 40,00" cents={r.subRateCents ?? null} onCommit={(c) => set(r.id, { subRateCents: c })} />
-                  : r.lohngruppe ? <span aria-label={`Satz ${r.name}`}>{eur((rates[r.lohngruppe] ?? 0) + r.surchargeCents)}</span> : '-'}</td>
-                <td><MoneyInput aria-label={`Zuschlag ${r.name}`} disabled={!!r.sub} cents={r.surchargeCents} onCommit={(c) => set(r.id, { surchargeCents: c ?? 0 })} /></td>
-                <td><input type="checkbox" aria-label={`Obermonteur ${r.name}`} checked={r.foreman} onChange={(e) => set(r.id, { foreman: e.target.checked })} /></td>
-                <td><MoneyInput aria-label={`Kostensatz ${r.name}`} disabled={!r.foreman} cents={r.foremanCostCents} onCommit={(c) => set(r.id, { foremanCostCents: c })} /></td>
-                <td><button onClick={() => save(r)}>Speichern</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {error && <p role="alert" className="error">{error}</p>}
+      {reportError && <p role="alert" className="error">{reportError}</p>}
+      {!report && !reportError && <p role="status" className="muted">Aktuelle Stunden und Umsätze werden geladen …</p>}
+      <div className="scroll"><table className="grid">
+        <thead><tr><th className="sticky">Name</th><th>Lohngruppe</th><th>SUB-Satz €/h</th><th>Zuschlag €/h</th><th>Obermonteur</th><th>Kostensatz €/h</th>
+          <th className="num">Anfahrt (h)</th><th className="num">Gearbeitet (h)</th><th className="num">Summe (h)</th><th className="num">Umsatz</th>
+          <th className="num">Urlaub (Tage)</th><th className="num">Krank (Tage)</th><th className="num">Feiertage (Tage)</th><th /></tr></thead>
+        <tbody>{rows.map(saved => {
+          const draft = edits[saved.id];
+          const r = { ...saved, ...draft };
+          const o = overview.get(r.id);
+          return <tr key={r.id}><th scope="row" className="sticky">{r.name}</th>
+            <td><select aria-label={`Lohngruppe ${r.name}`} value={r.sub ? 'SUB' : r.lohngruppe ?? ''} disabled={saving} onChange={e => {
+              const v = e.target.value;
+              set(r.id, v === 'SUB' ? { sub: true, lohngruppe: null } : { sub: false, lohngruppe: v ? Number(v) : null, subRateCents: null });
+            }}><option value="">–</option>{[1,2,3,4,5,6,7,8,9].map(n => <option key={n} value={n}>LG {n}</option>)}<option value="SUB">SUB</option></select>
+              {draft?.sub === undefined && saved.groupSince && (saved.sub || saved.lohngruppe) && <div className="muted">seit {germanDate(saved.groupSince)}</div>}
+              {draft?.sub === undefined && saved.nextGroup && <div className="muted">{saved.nextGroup.sub ? 'SUB' : saved.nextGroup.group ? 'LG ' + saved.nextGroup.group : 'Ohne Lohngruppe'} ab {germanDate(saved.nextGroup.from)}</div>}
+            </td>
+            <td>{r.sub && <MoneyInput className="amt" aria-label={`SUB-Satz ${r.name}`} cents={r.subRateCents ?? null} disabled={saving}
+              onCommit={c => c !== (r.subRateCents ?? null) && set(r.id, { subRateCents: c })} />}</td>
+            <td><MoneyInput className="amt" aria-label={`Zuschlag ${r.name}`} disabled={saving || !!r.sub} cents={r.surchargeCents}
+              onCommit={c => (c ?? 0) !== r.surchargeCents && set(r.id, { surchargeCents: c ?? 0 })} /></td>
+            <td><input type="checkbox" aria-label={`Obermonteur ${r.name}`} disabled={saving} checked={r.foreman} onChange={e => set(r.id, { foreman: e.target.checked })} /></td>
+            <td><MoneyInput className="amt" aria-label={`Kostensatz ${r.name}`} disabled={saving || !r.foreman} cents={r.foremanCostCents}
+              onCommit={c => c !== r.foremanCostCents && set(r.id, { foremanCostCents: c })} /></td>
+            <td className="num">{minutes(o?.travel)}</td><td className="num">{minutes(o?.worked)}</td><td className="num">{minutes(o ? o.travel + o.worked : undefined)}</td>
+            <td className="num">{o ? eur(o.revenue) : '–'}</td><td className="num">{number(o?.vacation)}</td>
+            <td className="num">{number(o?.sick)}</td><td className="num">{number(o?.holiday)}</td>
+            <td><button disabled={saving || !from} onClick={() => void save(r)}>Speichern</button></td>
+          </tr>;
+        })}</tbody>
+      </table></div>
+      <ToolAccounts employees={rows.filter(row => !row.sub)} refresh={refresh} />
     </section>
   );
 }
 
 type Loaded = Settings & { equalSplit: boolean };
+const PAY_GROUP_DESCRIPTIONS: Record<number, string> = {
+  1: 'Arbeiten ohne einschlägige Ausbildung',
+  2: 'Arbeiten nach Einarbeitung mit Kenntnissen in Teilbereichen',
+  3: 'Fachbezogenes Handwerk mit abgeschlossener Handwerkslehre',
+  4: 'Einfache fachbezogene Arbeiten nach Einarbeitung unter Aufsicht, mit abgeschlossener Handwerkslehre',
+  5: 'Fachbezogene Arbeiten in Werkstatt und Montage unter Aufsicht',
+  6: 'Selbstständige Montage, Reparaturen und bei Bedarf Aufmaß und Rechnungsunterlagen (Ecklohn)',
+  7: 'Selbstständige Facharbeit mit zusätzlichen fachlichen und organisatorischen Anforderungen',
+  8: '8a Gruppenführer (Obermonteur), 8b Kundendienstmonteur',
+  9: 'Bauleitender Obermonteur für größere Baustellen und Teams',
+};
 
 export function SettingsPage() {
   const [s, setS] = useState<Loaded | null>(null);
@@ -74,9 +125,10 @@ export function SettingsPage() {
       <h1>Einstellungen</h1>
       {msg && <p role="status">{msg}</p>}
       <div className="cols">
-        <fieldset><legend>Lohngruppen (€/h)</legend>
+        <fieldset className="wage-groups"><legend>Lohngruppen (€/h)</legend>
           {Object.keys(s.rates).map((g) => (
-            <label key={g}>LG {g}<MoneyInput aria-label={`Satz LG ${g}`} cents={s.rates[Number(g)]} onCommit={(c) => setS({ ...s, rates: { ...s.rates, [g]: c ?? 0 } })} /></label>
+            <label key={g}><span><strong>LG {g}</strong> {PAY_GROUP_DESCRIPTIONS[Number(g)]}</span>
+              <MoneyInput aria-label={`Satz LG ${g}`} cents={s.rates[Number(g)]} onCommit={c => setS({ ...s, rates: { ...s.rates, [g]: c ?? 0 } })} /></label>
           ))}
         </fieldset>
         <fieldset><legend>Bonus und Zuschläge</legend>
@@ -92,66 +144,6 @@ export function SettingsPage() {
         </fieldset>
       </div>
       <button className="primary" onClick={save}>Einstellungen speichern</button>
-    </section>
-  );
-}
-
-type Tool = { resource_id: string; price_cents: number; monthly_rate_cents: number; paid_before_cents: number; prepaid_cents: number };
-
-export function ToolsPage({ month, setMonth }: { month: string; setMonth: (m: string) => void }) {
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [emps, setEmps] = useState<TermsRow[]>([]);
-  const [view, setView] = useState<MonthView | null>(null);
-  const [f, setF] = useState({ resourceId: '', price: '', rate: '', prepaid: '' });
-  const [w, setW] = useState({ kw: '', hours: '', invoiced: '', rate: '40,00' });
-  const [msg, setMsg] = useState('');
-  const load = useCallback(async () => {
-    try {
-      setTools(await api<Tool[]>('/api/tools')); setEmps(await api<TermsRow[]>('/api/terms')); setView(await api<MonthView>(`/api/months/${month}`));
-    } catch (e) { setMsg((e as Error).message); }
-  }, [month]);
-  useEffect(() => { load(); }, [load]);
-  const name = (id: string) => emps.find((e) => e.id === id)?.name || id;
-  return (
-    <section>
-      <h1>Werkzeugkonto</h1>
-      {msg && <p role="alert" className="error">{msg}</p>}
-      <div className="scroll"><table>
-        <thead><tr><th>Mitarbeiter</th><th className="num">Preis</th><th className="num">Rate</th><th className="num">Bisher abgezogen</th><th className="num">Vorab bezahlt</th><th className="num">Restschuld</th></tr></thead>
-        <tbody>{tools.map((t) => <tr key={t.resource_id}><td>{name(t.resource_id)}</td><td className="num">{eur(t.price_cents)}</td><td className="num">{eur(t.monthly_rate_cents)}</td><td className="num">{eur(t.paid_before_cents)}</td><td className="num">{eur(t.prepaid_cents)}</td><td className="num">{eur(Math.max(0, t.price_cents - t.paid_before_cents - t.prepaid_cents))}</td></tr>)}</tbody>
-      </table></div>
-      <form className="inline" aria-label="Werkzeugkonto anlegen" onSubmit={async (e) => {
-        e.preventDefault();
-        try { await api('/api/tools', 'PUT', { resourceId: f.resourceId, priceCents: toCents(f.price) ?? 0, monthlyRateCents: toCents(f.rate) ?? 0, prepaidCents: toCents(f.prepaid) ?? 0 }); setF({ resourceId: '', price: '', rate: '', prepaid: '' }); load(); } catch (x) { setMsg((x as Error).message); }
-      }}>
-        <select required aria-label="Mitarbeiter" value={f.resourceId} onChange={(e) => setF({ ...f, resourceId: e.target.value })}><option value="">Mitarbeiter</option>{emps.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</select>
-        <input required placeholder="Preis €" aria-label="Preis" inputMode="decimal" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} />
-        <input required placeholder="Rate €/Monat" aria-label="Rate" inputMode="decimal" value={f.rate} onChange={(e) => setF({ ...f, rate: e.target.value })} />
-        <input placeholder="Vorab bezahlt €" aria-label="Vorab bezahlt" inputMode="decimal" value={f.prepaid} onChange={(e) => setF({ ...f, prepaid: e.target.value })} />
-        <button className="primary">Speichern</button>
-      </form>
-
-      <h1>Externe Obermonteur-Wochen</h1>
-      <div className="toolbar"><label>Monat <input type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} /></label><span className="muted">Wochen zählen nach Leistungsdatum im Monat.</span></div>
-      <div className="scroll"><table>
-        <thead><tr><th>Woche</th><th className="num">Stunden</th><th className="num">Soll (Stunden × Satz)</th><th className="num">Rechnung netto</th><th className="num">Differenz</th><th /></tr></thead>
-        <tbody>{view?.result.external.map((x) => (
-          <tr key={x.id}><td>{x.label}</td><td className="num">{(x.minutes / 60).toFixed(1).replace('.', ',')}</td><td className="num">{eur(x.expected)}</td><td className="num">{eur(x.invoiced)}</td><td className={'num' + (x.diff ? ' neg' : '')}>{eur(x.diff)}</td>
-            <td>{!view.frozen && <button onClick={async () => { await api(`/api/external/${x.id}`, 'DELETE'); load(); }}>Löschen</button>}</td></tr>
-        ))}</tbody>
-      </table></div>
-      {view && !view.frozen && (
-        <form className="inline" aria-label="Woche erfassen" onSubmit={async (e) => {
-          e.preventDefault();
-          try { await api('/api/external', 'POST', { month, kw: w.kw, minutes: Math.round(Number(w.hours.replace(',', '.')) * 60), invoicedCents: toCents(w.invoiced) ?? 0, rateCents: toCents(w.rate) ?? 4000 }); setW({ ...w, kw: '', hours: '', invoiced: '' }); setMsg(''); load(); } catch (x) { setMsg((x as Error).message); }
-        }}>
-          <input required placeholder="KW, z. B. 2027-W05" aria-label="KW" pattern="\d{4}-W\d{2}" value={w.kw} onChange={(e) => setW({ ...w, kw: e.target.value })} />
-          <input required placeholder="Stunden" aria-label="Stunden" inputMode="decimal" value={w.hours} onChange={(e) => setW({ ...w, hours: e.target.value })} />
-          <input required placeholder="Rechnung netto €" aria-label="Rechnung netto" inputMode="decimal" value={w.invoiced} onChange={(e) => setW({ ...w, invoiced: e.target.value })} />
-          <input placeholder="Satz €/h" aria-label="Satz" inputMode="decimal" value={w.rate} onChange={(e) => setW({ ...w, rate: e.target.value })} />
-          <button className="primary">Erfassen</button>
-        </form>
-      )}
     </section>
   );
 }

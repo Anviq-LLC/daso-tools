@@ -1,0 +1,1 @@
+ALTER TABLE tool_accounts ADD COLUMN own_tools INTEGER NOT NULL DEFAULT 0;

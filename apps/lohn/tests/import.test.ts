@@ -48,10 +48,19 @@ test('single worker gets the Mitarbeiterwert, several workers without assignment
   assert.deepEqual(one.revenue.map((r) => [r.resourceId, r.cents]), [['r1', 9000]]);
   const two = importAufmass(parseRecords(recs([mk(['e1', 'e2'])])), '2027-01');
   assert.equal(two.revenue.length, 0);
+  assert.deepEqual(two.enteredRevenue.map(row => [row.resourceId, row.day, row.cents]), [
+    ['r1', '2027-01-12', 4500], ['r2', '2027-01-12', 4500],
+  ]);
   assert.match(two.warnings.join(), /Zuordnung fehlt/);
   const split = importAufmass(parseRecords(recs([mk(['e1', 'e2'])])), '2027-01', { allowEqualSplit: true });
   assert.equal(split.revenue.reduce((n, r) => n + r.cents, 0), 9000);
   assert.match(split.warnings.join(), /vorläufig/);
+  const group = mk(['e1', 'e2']);
+  const saturday = '2027-01-16';
+  const weekend = importAufmass(parseRecords(recs([{ ...group, date: saturday, endDate: saturday,
+    lines: group.lines.map(line => ({ ...line, serviceDate: saturday })) }])), '2027-01');
+  assert.deepEqual(weekend.revenue.map(row => [row.resourceId, row.cents]), [['r1', 4500], ['r2', 4500]]);
+  assert.deepEqual(weekend.warnings, []);
 });
 
 test('other months and drafts are not counted, unchecked days are listed', () => {
@@ -67,4 +76,63 @@ test('a report written in March for work on 25 Feb counts in February only', () 
   late.lines[0].serviceDate = '2027-02-25';
   assert.equal(importAufmass(parseRecords(recs([late])), '2027-02').revenue.length, 1);
   assert.equal(importAufmass(parseRecords(recs([late])), '2027-03').revenue.length, 0);
+});
+
+test('mehrtägiges NU-Aufmaß übernimmt die 90-%-Umsatzwerte und berechnet Gesamtstunden nur einmal', () => {
+  const base = mk([]);
+  const run = (hours: number | null) => importAufmass(parseRecords(recs([{
+    ...base, endDate: '2027-01-13',
+    teamWork: { code: 'NU1', company: 'Firma', hourlyRate: 3500, workers: [{ name: 'NU', hours }] },
+    lines: [base.lines[0], { ...base.lines[0], id: 'l2', serviceDate: '2027-01-13' }],
+  }])), '2027-01').nu[0];
+  const row = run(16);
+  assert.deepEqual([row.projectName, row.revenue, row.cost, row.issues?.length], ['Haus', 18000, 56000, 0]);
+  assert.deepEqual(row.undatedCosts, [{ from: '2027-01-12', to: '2027-01-13' }]);
+  assert.equal(run(null).issues?.[0].reason, 'NU-Gesamtstunden im Aufmaß fehlen');
+});
+
+test('historisches NU-Stundenaufmaß nutzt den im Bericht gespeicherten Team-Stundensatz', () => {
+  const base = mk([]);
+  const report = {
+    ...base, kind: 'timesheet',
+    teamWork: { code: 'T1', company: 'Firma', hourlyRate: 3500, workers: [{ name: 'NU', hours: 2 }] },
+    lines: [{ ...base.lines[0], quantity: 2, workerId: 'sub:T1:0' }],
+    timeSheet: { anchorDate: base.date, mode: 'day', factor: 0.9, entries: [{
+      id: 'entry', workerId: 'sub:T1:0', date: base.date, role: 'fitter', start: '08:00', end: '10:00',
+      pauseMinutes: 0, travelQuantity: 0, overnightQuantity: 0,
+      rates: { costHourly: null, billingHourly: 10000, travelCost: 0, overnightCost: 0 },
+    }] },
+  };
+  const [row] = importAufmass(parseRecords(recs([report])), '2027-01').nu;
+  assert.deepEqual([row.revenue, row.cost, row.issues], [18000, 7000, []]);
+});
+
+test('NU-Aufmaß ohne Teamsatz nutzt die gespeicherten Einzelkostensätze je Leistungsdatum', () => {
+  const base = mk([]);
+  const report = {
+    ...base, endDate: '2027-01-13',
+    teamWork: { code: 'T1', company: 'Firma', workers: [
+      { name: 'Monteur', hourlyRate: 3500, hours: 8, dailyHours: { '2027-01-12': 8, '2027-01-13': 0 } },
+      { name: 'Obermonteur', hourlyRate: 4500, hours: 8, dailyHours: { '2027-01-12': 0, '2027-01-13': 8 } },
+    ] },
+    lines: [base.lines[0], { ...base.lines[0], id: 'l2', serviceDate: '2027-01-13' }],
+  };
+  const [row] = importAufmass(parseRecords(recs([report])), '2027-01').nu;
+  assert.deepEqual([row.cost, row.daily?.['2027-01-12'].cost, row.daily?.['2027-01-13'].cost, row.issues], [64000, 28000, 36000, []]);
+});
+
+test('NU-Stundenaufmaß liest den Einzelkostensatz aus der gespeicherten Besetzung', () => {
+  const base = mk([]);
+  const report = {
+    ...base, kind: 'timesheet',
+    teamWork: { code: 'T1', company: 'Firma', workers: [{ name: 'NU', hours: null, hourlyRate: 4200 }] },
+    lines: [{ ...base.lines[0], quantity: 2, workerId: 'sub:T1:0' }],
+    timeSheet: { anchorDate: base.date, mode: 'day', factor: 0.9, entries: [{
+      id: 'entry', workerId: 'sub:T1:0', date: base.date, role: 'fitter', start: '08:00', end: '10:00',
+      pauseMinutes: 0, travelQuantity: 0, overnightQuantity: 0,
+      rates: { costHourly: null, billingHourly: 10000, travelCost: 0, overnightCost: 0 },
+    }] },
+  };
+  const [row] = importAufmass(parseRecords(recs([report])), '2027-01').nu;
+  assert.deepEqual([row.revenue, row.cost, row.issues], [18000, 8400, []]);
 });

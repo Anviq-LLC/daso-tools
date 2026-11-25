@@ -9,3 +9,6 @@ export const ORDER = Object.keys(LABELS);
 export const sortCodes = (codes: Iterable<string>) => [...new Set(codes)].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
 export const de = (n: number, digits = 2) => n.toFixed(digits).replace('.', ',');
 export const deEur = (cents: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+
+export const MANUAL_HOURS_HINT = 'Stunden manuell geändert';
+export const HOURS_WITHOUT_REVENUE_HINT = 'Stunden ohne Umsatz';

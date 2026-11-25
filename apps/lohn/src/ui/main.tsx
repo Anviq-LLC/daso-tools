@@ -3,19 +3,22 @@ import { createRoot } from 'react-dom/client';
 import { api } from './api.ts';
 import { MonthPage } from './MonthPage.tsx';
 import { PayrollPage } from './Payroll.tsx';
-import { AccessPage, EmployeesPage, SettingsPage, ToolsPage, AuditPage } from './Pages.tsx';
+import { AccessPage, EmployeesPage, SettingsPage, AuditPage } from './Pages.tsx';
 import logo from './logo.png';
 import './style.css';
 
-const TABS = [['month', 'Monat'], ['payroll', 'Lohnabrechnung'], ['employees', 'Mitarbeiter'], ['tools', 'Werkzeug und Extern'], ['settings', 'Einstellungen'], ['audit', 'Protokoll'], ['access', 'Zugänge']] as const;
+const TABS = [['month', 'Monat'], ['payroll', 'Lohnabrechnung'], ['employees', 'Mitarbeiter'], ['settings', 'Einstellungen'], ['audit', 'Protokoll'], ['access', 'Zugänge']] as const;
 type Tab = (typeof TABS)[number][0];
+type Session = { email: string; role: string };
 
 function App() {
-  const [me, setMe] = useState<{ email: string; role: string } | null>(null);
+  const [me, setMe] = useState<Session | null>(null);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('month');
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
-  useEffect(() => { api<{ email: string; role: string }>('/api/me').then(setMe).catch((e) => setError(e.message)); }, []);
+  const [month, setMonth] = useState(() => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format().slice(0, 7));
+  useEffect(() => {
+    api<Session>('/api/me').then(setMe).catch((e) => setError(e.message));
+  }, []);
   if (error) return <main className="center"><h1>Kein Zugang</h1><p role="alert">{error}</p></main>;
   if (!me) return <main className="center"><p>Lade ...</p></main>;
   return (
@@ -31,12 +34,11 @@ function App() {
       </header>
       <main>
         {tab === 'month' && <MonthPage month={month} setMonth={setMonth} role={me.role} />}
-        {tab === 'payroll' && <PayrollPage month={month} setMonth={setMonth} />}
-        {tab === 'employees' && <EmployeesPage month={month} />}
-        {tab === 'tools' && <ToolsPage month={month} setMonth={setMonth} />}
+        {tab === 'payroll' && <PayrollPage month={month} setMonth={setMonth} role={me.role} />}
+        {tab === 'employees' && <EmployeesPage month={month} setMonth={setMonth} />}
         {tab === 'settings' && <SettingsPage />}
-        {tab === 'audit' && <AuditPage />}
         {tab === 'access' && me.role === 'gf' && <AccessPage me={me.email} />}
+        {tab === 'audit' && <AuditPage />}
       </main>
     </>
   );

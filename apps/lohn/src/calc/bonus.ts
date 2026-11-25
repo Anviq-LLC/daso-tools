@@ -4,27 +4,27 @@ export type Tier = { from: number; rate: number };
 export const STANDARD_TIERS: Tier[] = [
   { from: 800_000, rate: 20 },
   { from: 1_000_000, rate: 25 },
-  { from: 1_200_000, rate: 30 },
+  { from: 1_200_000, rate: 35 },
   { from: 1_400_000, rate: 35 },
 ];
 
 // Each tier pays its rate only on the revenue that falls inside it.
-export function progressiveBonus(revenue: number, tiers: Tier[] = STANDARD_TIERS): number {
+export function progressiveBonusTiers(revenue: number, tiers: Tier[] = STANDARD_TIERS) {
   const sorted = [...tiers].sort((a, b) => a.from - b.from);
-  let sum = 0;
-  sorted.forEach((t, i) => {
-    const to = sorted[i + 1]?.from ?? Infinity;
-    sum += Math.round((Math.max(0, Math.min(revenue, to) - t.from) * t.rate) / 100);
+  return sorted.map((tier, index) => {
+    const to = sorted[index + 1]?.from ?? null;
+    const eligible = Math.max(0, Math.min(revenue, to ?? revenue) - tier.from);
+    return { ...tier, to, eligible, cents: Math.round((eligible * tier.rate) / 100) };
   });
-  return sum;
 }
 
-// Saturday is its own pot: top up to 40% of Saturday revenue, never below the owed pay.
-export function saturdayBonus(saturdayRevenue: number, creditedPay: number, rate = 40) {
-  const target = Math.round((saturdayRevenue * rate) / 100);
-  const bonus = Math.max(0, target - creditedPay);
-  return { target, bonus, total: creditedPay + bonus };
+export function progressiveBonus(revenue: number, tiers: Tier[] = STANDARD_TIERS): number {
+  return progressiveBonusTiers(revenue, tiers).reduce((sum, tier) => sum + tier.cents, 0);
 }
+
+// The Saturday share is paid in addition to the wages for the hours worked.
+export const saturdayBonus = (revenue: number, rate = 40) =>
+  Math.max(0, Math.round((revenue * rate) / 100));
 
 export const hoursPay = (minutes: number, centsPerHour: number) =>
   Math.round((minutes * centsPerHour) / 60);
@@ -45,9 +45,4 @@ export function nuProjectBonus(p: {
 export function toolInstallment(price: number, paidBefore: number, booked: number, monthlyRate: number) {
   const debt = Math.max(0, price - paidBefore - booked);
   return { debt, installment: Math.min(monthlyRate, debt) };
-}
-
-export function externalWeek(minutes: number, centsPerHour: number, invoiced: number) {
-  const expected = hoursPay(minutes, centsPerHour);
-  return { expected, diff: invoiced - expected };
 }

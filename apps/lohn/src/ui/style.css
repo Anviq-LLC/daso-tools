@@ -53,12 +53,64 @@ tfoot th, tfoot td { font-weight: 700; border-top: 2px solid var(--line); }
 .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 14px; }
 fieldset { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); display: grid; gap: 8px; align-content: start; }
 fieldset label { display: grid; grid-template-columns: 1fr 110px; gap: 8px; align-items: center; } fieldset label.check { grid-template-columns: auto 1fr; } fieldset textarea { width: 100%; }
+.wage-groups label { grid-template-columns: minmax(0, 1fr) 5.75rem; }
 .nu { margin-top: 20px; }
+.tool-accounts { margin-top: 24px; }
 @media (max-width: 850px) { .bar { padding: 12px 16px 0; gap: 10px; } .bar nav { flex-basis: 100%; overflow-x: auto; flex-wrap: nowrap; } .tab { min-height: 48px; padding: 0 14px; white-space: nowrap; } .who { margin-left: 0; } }
 @media (max-width: 640px) { main { padding: 18px 14px 40px; } .brand img { width: 78px; height: 40px; } }
 .payroll th { white-space: normal; min-width: 84px; } .payroll .sticky { min-width: 130px; } .amt { width: 92px; text-align: right; padding: 4px 6px; } .amt.day { width: 56px; } .amt::placeholder { color: var(--muted); opacity: .8; }
+.payroll .payroll-rename { padding: 3px 6px; margin-left: 3px; font-size: 16px; }
+.payroll-column-editor { display: grid; justify-items: end; gap: 4px; margin-top: 4px; }
+.payroll-column-editor input { width: 100%; }
+.payroll-column-editor div { display: flex; gap: 4px; }
+.allowance-note { margin-top: 3px; font-size: 12px; }
 .notes { margin-top: 16px; } .note { display: grid; gap: 6px; font-weight: 600; font-size: 13px; } .note textarea { width: 100%; font-weight: 400; }
 .sub { margin-top: 20px; }
+.employee-calendar-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .cal { margin: 8px 0 12px; } .cal thead th { position: static; } .cal tr.gap td { background: var(--warn-bg); } .cal tr.error td { background: #fff0f1; color: var(--err); } .cal tfoot td { font-weight: 700; }
 @page { size: A4 landscape; margin: 10mm; }
+@media print { .payroll .payroll-rename, .payroll-column-editor, .allowance-note { display: none; } }
 @media print { .payroll .amt { border: 0; background: none; width: auto; } .payroll th { min-width: 0; } .notes textarea { border: 1px solid #999; } .bar, .toolbar button, .toolbar a, .inline, .ack { display: none; } body { background: #fff; color: #000; } .scroll { overflow: visible; border: 0; } }
+.demo-notice {
+  border: 1px solid var(--line);
+  background: var(--head);
+  color: var(--ink);
+  padding: .65rem .85rem;
+  margin: 0 0 1rem;
+  border-radius: 6px;
+}
+
+
+.nu-recipients { display: grid; grid-template-columns: repeat(2, minmax(135px, 1fr)); gap: 8px; }
+.nu-recipients label, .nu-range { display: grid; gap: 3px; }
+.nu-range { margin-top: 6px; }
+.nu-recipients select, .nu-range input { width: 100%; min-width: 0; }
+.nu details { white-space: normal; min-width: 150px; margin-top: 5px; }
+.nu details ul { padding-left: 16px; }
+
+.copy-hint { cursor: copy; text-align: left; }
+.warnlist .copy-hint, .cal .copy-hint { white-space: normal; background: none; border-color: transparent; padding: 2px 4px; }
+
+.sub-week-days > td { background: var(--head); padding: 8px 12px; }
+
+.sub-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; margin-top: 14px; }
+.sub-details p { margin-top: 0; }
+.sub-bonus { border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.sub-bonus h3 { margin: 0 0 12px; }
+.sub-bonus th { white-space: normal; }
+.sub-bonus-result { margin: 10px 0; }
+@media (max-width: 800px) { .sub-details { grid-template-columns: minmax(0, 1fr); } }
+
+.employee-calendar h3 { margin: 12px 0 6px; font-size: 14px; }
+.employee-calendar .cal { margin: 0; }
+.employee-calendar .cal :is(th, td) { padding: 4px 8px; line-height: 1.35; }
+.employee-calendar .cal :is(.cal-note, .cal-project) { white-space: normal; overflow-wrap: anywhere; }
+.employee-calendar .cal .copy-hint { padding: 0; line-height: inherit; }
+
+.revenue-bonus { margin-top: 14px; }
+.revenue-bonus h3 { margin: 0 0 6px; font-size: 14px; }
+.revenue-bonus :is(td, th) { padding: 4px 8px; }
+.bonus-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.bonus-tiers { margin-top: 8px; }
+.bonus-calculation-note { font-size: 12px; font-weight: 400; white-space: normal; }
+@media (max-width: 720px) { .bonus-columns { grid-template-columns: minmax(0, 1fr); } }

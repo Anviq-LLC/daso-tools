@@ -5,7 +5,7 @@ import { join } from 'node:path';
 const from = process.env.AUFMASS_LIB || join(import.meta.dirname, '..', '..', 'aufmass', 'lib');
 const to = join(import.meta.dirname, '..', 'src', 'vendor', 'aufmass');
 mkdirSync(to, { recursive: true });
-for (const f of ['types', 'business', 'employees', 'report-crews', 'time-reports', 'ids']) {
+for (const f of ['types', 'business', 'employees', 'report-crews', 'time-reports', 'team-members', 'ids']) {
   let src = readFileSync(join(from, f + '.ts'), 'utf8');
   src = src
     .replace(/import type \{PortalLink\} from '\.\/portal';/, 'type PortalLink=unknown;')
