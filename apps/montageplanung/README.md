@@ -23,18 +23,16 @@ pnpm run dev
 ## Build & deploy
 
 ```bash
-pnpm run build
-node scripts/patch-wrangler-config.mjs   # injects the production D1/R2 bindings
-wrangler deploy --config dist/server/wrangler.json
+pnpm exec wrangler deploy
 ```
 
 Pushes to `main` deploy through Cloudflare Workers Builds with root directory
-`apps/montageplanung`. The build command runs `node scripts/patch-wrangler-config.mjs`
-after `pnpm run build`, and the deploy command uses `dist/server/wrangler.json`.
+`apps/montageplanung`. Leave the build command empty and keep the deploy command
+`npx wrangler deploy`; `wrangler.jsonc` runs `pnpm run build` itself.
 
 ## Database migrations
 
 ```bash
 pnpm run db:generate   # after editing db/schema.ts
-wrangler d1 execute DB --remote --config dist/server/wrangler.json --file drizzle/<new-migration>.sql
+wrangler d1 execute DB --remote --file drizzle/<new-migration>.sql
 ```

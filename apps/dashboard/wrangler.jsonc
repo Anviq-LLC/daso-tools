@@ -6,6 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "preview_urls": false,
   "observability": { "enabled": true },
+  "build": { "command": "pnpm run build" },
   "assets": { "directory": "dist", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": true },
   "vars": {
     "CF_ACCESS_TEAM_DOMAIN": "dasoluft.cloudflareaccess.com",

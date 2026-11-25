@@ -13,7 +13,7 @@ Browser tests start a local worker with synthetic databases and signed test toke
 
 ## Deploy
 
-Cloudflare builds and deploys from the connected GitHub repository. Build command `pnpm build`, deploy command `pnpm exec wrangler d1 migrations apply DB --remote && pnpm exec wrangler deploy`.
+Cloudflare builds and deploys from the connected GitHub repository. Leave the build command empty (`wrangler.jsonc` runs `pnpm run build`). Deploy command `pnpm exec wrangler d1 migrations apply DB --remote && pnpm exec wrangler deploy`.
 
 1. Put the application in front of Cloudflare Access and set `CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD` and `DASO_OWNER_EMAIL` as worker variables. Without them every request returns 401.
 2. Add the accounting and management emails under Einstellungen, Zugänge.

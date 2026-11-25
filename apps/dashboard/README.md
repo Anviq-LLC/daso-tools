@@ -50,7 +50,7 @@ The Aufmass calculation code is vendored with `pnpm sync:aufmass` so both tools 
 
 ```
 pnpm exec wrangler d1 migrations apply DB --remote
-pnpm build && pnpm exec wrangler deploy
+pnpm exec wrangler deploy
 pnpm exec wrangler deploy -c wrangler.api.jsonc
 printf %s "<key>" | sha256sum    # store the hash as the API_KEY_HASH secret of daso-data-api
 ```
