@@ -346,12 +346,10 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     await log(env, who, 'bwa-accept', imp.id);
     return reply({ ok: true });
   }
-  // accepted reports of the year and the year before, in the shape the browser calculations expect
+  // all accepted reports, in the shape the browser calculations expect
   if (p === '/api/accounting-reports' && method === 'GET') {
     need(can.costs(who));
-    const y = Number(q.get('year'));
-    if (!Number.isInteger(y) || y < 2020 || y > 2100) throw new HttpError(400, 'Ungültiges Jahr.');
-    const rows = await env.DB.prepare("SELECT filename, source_format, imported_at, edited_at, report FROM bwa_import WHERE status = 'accepted' AND report IS NOT NULL AND period >= ? AND period <= ?").bind(`${y - 1}-01`, `${y}-12`).all<{ filename: string; source_format: string; imported_at: string; edited_at: string | null; report: string }>();
+    const rows = await env.DB.prepare("SELECT filename, source_format, imported_at, edited_at, report FROM bwa_import WHERE status = 'accepted' AND report IS NOT NULL ORDER BY period").all<{ filename: string; source_format: string; imported_at: string; edited_at: string | null; report: string }>();
     return reply(rows.results.map((r) => ({ ...JSON.parse(r.report), name: r.filename, importedAt: r.imported_at, ocr: r.source_format === 'pdf-ocr', ...(r.edited_at ? { editedAt: r.edited_at } : {}) })));
   }
   if (p === '/api/bwa-compare' && method === 'GET') {

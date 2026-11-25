@@ -29,11 +29,10 @@ export function App() {
   useEffect(() => {
     api<Me>('/api/me').then((m) => { setMe(m); setMonth(m.today.slice(0, 7)); }).catch((e) => setError(e.message));
   }, []);
-  // accepted BWA/SuSa reports of the selected and the previous year; roles without access simply see none
+  // all accepted BWA/SuSa reports; roles without access simply see none
   useEffect(() => {
-    if (!year) return;
-    api<AccountingReport[]>(`/api/accounting-reports?year=${year}`).then(setReports).catch(() => setReports([]));
-  }, [year, booksVersion]);
+    api<AccountingReport[]>('/api/accounting-reports').then(setReports).catch(() => setReports([]));
+  }, [booksVersion]);
   const history = useMemo(() => accountingMonths(reports), [reports]);
   const load = useCallback(() => {
     if (!month || tab === 'Übersicht' || tab === 'Subs' || tab === 'Mitarbeiter' || tab === 'Projekte') return;

@@ -17,10 +17,10 @@ test('PDF report import derives lines, is read back after accept, can be correct
   const made = await call('/api/bwa/import', 'POST', { kind: 'bwa', period: '2026-10', filename: 'bwa.pdf', format: 'pdf', lines: [], report: bwa });
   assert.equal(made.status, 201);
   assert.equal(made.body.unmapped, 0);
-  assert.equal((await call('/api/accounting-reports?year=2026')).body.length, 0, 'not visible before accept');
+  assert.equal((await call('/api/accounting-reports')).body.length, 0, 'not visible before accept');
   assert.equal((await call(`/api/bwa/${made.body.id}/accept`, 'POST')).status, 200);
 
-  const out = (await call('/api/accounting-reports?year=2026')).body;
+  const out = (await call('/api/accounting-reports')).body;
   assert.equal(out.length, 1);
   assert.equal(out[0].revenue, 1_281_170);
   assert.equal(out[0].beforeTax, -213_957);
@@ -29,14 +29,14 @@ test('PDF report import derives lines, is read back after accept, can be correct
   const fixed = structuredClone(bwa);
   fixed.rows[0].month = 1_300_000;
   assert.equal((await call(`/api/bwa/${made.body.id}/report`, 'PUT', { report: fixed })).body.changed, 1);
-  assert.equal((await call('/api/accounting-reports?year=2026')).body[0].revenue, 1_300_000);
+  assert.equal((await call('/api/accounting-reports')).body[0].revenue, 1_300_000);
   const detail = (await call(`/api/bwa/${made.body.id}`)).body;
   assert.equal(detail.lines.find((l: any) => l.label === 'Umsatzerlöse').cents, 1_300_000);
   assert.ok(detail.import.edited_at);
   assert.equal((await call(`/api/bwa/${made.body.id}/lines`, 'POST', { edits: [{ n: 1, cents: 5 }] })).status, 409);
 
   assert.equal((await call(`/api/bwa/${made.body.id}`, 'DELETE')).status, 200);
-  assert.equal((await call('/api/accounting-reports?year=2026')).body.length, 0);
+  assert.equal((await call('/api/accounting-reports')).body.length, 0);
   assert.equal((env as any).DB.raw.prepare('SELECT COUNT(*) AS n FROM bwa_line').get().n, 0);
 });
 
