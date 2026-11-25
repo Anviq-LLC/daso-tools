@@ -28,8 +28,9 @@ node scripts/patch-wrangler-config.mjs   # injects the production D1/R2 bindings
 wrangler deploy --config dist/server/wrangler.json
 ```
 
-Pushes to `main` deploy automatically via `.github/workflows/deploy.yml` (requires
-a `CLOUDFLARE_API_TOKEN` repository secret with Workers Scripts edit access).
+Pushes to `main` deploy through Cloudflare Workers Builds with root directory
+`apps/montageplanung`. The build command runs `node scripts/patch-wrangler-config.mjs`
+after `pnpm run build`, and the deploy command uses `dist/server/wrangler.json`.
 
 ## Database migrations
 
