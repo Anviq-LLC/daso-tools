@@ -1,4 +1,4 @@
-# DaSo tools
+# Daso tools
 
 Monorepo for the DaSo Lüftungsbau internal tools. Each app under `apps/` keeps its own
 dependencies, Cloudflare Worker and deploy settings.
