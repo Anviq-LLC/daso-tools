@@ -1,7 +1,7 @@
 // Identity comes only from a verified Cloudflare Access JWT. Without it every request is refused.
 export type Role = 'gf' | 'buchhaltung' | 'viewer';
 export type Env = {
-  DB: D1Database; PLAN: D1Database; AUFMASS: D1Database; ASSETS: Fetcher; BUCKET?: R2Bucket;
+  DB: D1Database; PLAN: D1Database; AUFMASS: D1Database; LOHN_DB?: D1Database; NU_DB?: D1Database; ASSETS: Fetcher; BUCKET?: R2Bucket;
   CF_ACCESS_TEAM_DOMAIN?: string; CF_ACCESS_AUD?: string; CF_ACCESS_JWKS?: string;
   DASO_OWNER_EMAIL?: string; DASO_DEV_IDENTITY?: string; DASO_EXPORT_KEY_HASH?: string;
 };

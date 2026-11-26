@@ -58,3 +58,7 @@ printf %s "<key>" | sha256sum    # store the hash as the API_KEY_HASH secret of 
 ```
 
 Protect the dashboard Worker with a Cloudflare Access application. The data API Worker uses its own Bearer key.
+
+## Figures from other tools
+
+`/api/flows?month=YYYY-MM` returns the gross pay of released Lohntool months (`LOHN_DB`) and the reviewed Nachunternehmer invoices of the month (`NU_DB`). The Overview shows them next to the Dashboard's own estimates and does not replace those. Without a binding or its tables the figure is simply left out.

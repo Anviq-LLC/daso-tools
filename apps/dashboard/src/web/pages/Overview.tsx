@@ -33,6 +33,22 @@ function RevenueTiles({ figures, total, period, forecast, targets }: {
   </div>;
 }
 
+// Figures other tools send to the Dashboard. They sit next to the estimates and do not replace them.
+function ReceivedFigures({ month }: { month: string }) {
+  const [f, setF] = useState<any | null>(null);
+  useEffect(() => { setF(null); api('/api/flows?month=' + month).then(setF).catch(() => setF(null)); }, [month]);
+  if (!f || (!f.payroll && !f.nu)) return null;
+  const released = f.payroll?.grossCents !== null && f.payroll?.grossCents !== undefined;
+  return <div className="tiles">
+    {f.payroll && <div className="tile"><small>Personalkosten laut Lohntool (Brutto)</small>
+      <strong>{released ? money(f.payroll.grossCents) : '—'}</strong>
+      <small>{released ? f.payroll.employees + ' Mitarbeiter · freigegeben' : 'Monat im Lohntool noch nicht freigegeben'}</small></div>}
+    {f.nu && <div className="tile"><small>Geprüfte Nachunternehmer-Rechnungen (netto)</small>
+      <strong>{f.nu.invoices ? money(f.nu.reviewedCents) : '—'}</strong>
+      <small>{f.nu.invoices ? f.nu.invoices + ' Rechnung(en) · ' + f.nu.byCompany.slice(0, 3).map((c: { name: string; cents: number }) => c.name + ' ' + money(c.cents)).join(' · ') : 'Keine geprüften Rechnungen in diesem Monat'}</small></div>}
+  </div>;
+}
+
 // Costs, profit and the notes only exist for one month, so they sit below the calendar views.
 function MonthDetails({ d, month }: { d: MonthData; month: string }) {
   const [changes, setChanges] = useState<any[] | null>(null);
@@ -153,5 +169,6 @@ export function Overview({ selectedMonth, onPeriodChange, accounting }: {
       <small className="muted">Mitarbeiterzeilen sind Anteile desselben Kundenumsatzes: ein Aufmaß zählt im Gesamtumsatz nur einmal.</small>
     </section>}
     {details && <MonthDetails d={details} month={selectedMonth} />}
+    {details && <ReceivedFigures month={selectedMonth} />}
   </>;
 }

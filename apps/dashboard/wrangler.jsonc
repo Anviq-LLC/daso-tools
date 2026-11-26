@@ -17,6 +17,8 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "daso-admin-dashboard", "database_id": "74796d95-5ae7-4cdd-8a8b-ae14fe266968", "migrations_dir": "migrations" },
     { "binding": "PLAN", "database_name": "daso-montageplanung", "database_id": "42f5d224-bb84-4fd2-a1f8-d6abfda88956" },
-    { "binding": "AUFMASS", "database_name": "daso-aufmass-eu", "database_id": "b7dcd995-d426-4809-bb1f-60ffe3d1513b" }
+    { "binding": "AUFMASS", "database_name": "daso-aufmass-eu", "database_id": "b7dcd995-d426-4809-bb1f-60ffe3d1513b" },
+    { "binding": "LOHN_DB", "database_name": "daso-lohntool", "database_id": "ef104d2a-1a3e-4774-84d9-5d3851b71bd1" },
+    { "binding": "NU_DB", "database_name": "daso-nachunternehmer", "database_id": "086b2409-9985-4d43-9ce7-18867308ebd4" }
   ]
 }

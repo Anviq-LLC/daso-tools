@@ -4,6 +4,7 @@ import { employeePeriod } from '../calc/employee-calendar.ts';
 import { subCalendarFirms } from '../calc/sub-calendar.ts';
 import { checkSettings, loadSettings, saveSettings } from './settings.ts';
 import { reconcileAll, refreshChanged, refreshMonth } from './ingest.ts';
+import { flows } from './flows.ts';
 import { bucketOf, BUCKETS, checkReport, DEFAULT_MAPPING, pdfLines, suggest, summarize, type Line } from '../calc/bwa.ts';
 import { resolveFirm } from '../calc/extract.ts';
 import { toCsv } from './export.ts';
@@ -64,6 +65,7 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
   if (p === '/api/me') return reply({ email: who.email, role: who.role, sensitive: who.sensitive, today: berlinToday() });
 
   if (p === '/api/month' && method === 'GET') return reply(await monthReport(env, who, month(q.get('month'))));
+  if (p === '/api/flows' && method === 'GET') return reply(await flows(env, month(q.get('month'))));
   if (p === '/api/year' && method === 'GET') {
     const y = Number(q.get('year'));
     if (!Number.isInteger(y) || y < 2020 || y > 2100) throw new HttpError(400, 'Ungültiges Jahr.');
