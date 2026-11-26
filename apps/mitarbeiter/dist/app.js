@@ -141,7 +141,9 @@ async function render() {
   $('tabs').replaceChildren(...available.map(([k, v]) => h('button', { class: 'navbtn' + (k === state.tab ? ' active' : ''), type: 'button', onclick: () => { state.tab = k; render(); } }, v[0])));
   $('crumb').textContent = state.tab ? '/ ' + VIEWS[state.tab][0] : '';
   const nodes = state.tab ? await VIEWS[state.tab][1]() : [];
-  $('view').replaceChildren(...nodes.filter(Boolean));
+  // Every page starts with a small label and its title, as in Aufmass and Montageplanung.
+  const heading = state.tab ? h('div', { class: 'heading' }, h('div', {}, h('div', { class: 'eyebrow' }, 'DASO · MITARBEITER'), h('h1', {}, VIEWS[state.tab][0]))) : null;
+  $('view').replaceChildren(...[heading, ...nodes].filter(Boolean));
 }
 
 state.me = await api('me');
