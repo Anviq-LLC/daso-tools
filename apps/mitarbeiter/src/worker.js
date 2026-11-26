@@ -44,7 +44,7 @@ async function handle(env, who, request, path, url) {
   const office = !!who.me?.office;
   const staff = who.admin || office;
 
-  if (get && path === '/api/me') return json({ admin: who.admin, me: who.me, master: await isMaster(env), open: office ? await openPunch(env, who.me.id) : null });
+  if (get && path === '/api/me') return json({ admin: who.admin, email: who.email, me: who.me, master: await isMaster(env), open: office ? await openPunch(env, who.me.id) : null });
 
   if (get && path === '/api/punches') {
     const month = url.searchParams.get('month') || '';

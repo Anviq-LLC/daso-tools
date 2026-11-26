@@ -145,4 +145,7 @@ async function render() {
 }
 
 state.me = await api('me');
-if (state.me) render();
+if (state.me) {
+  $('user').replaceChildren(state.me.email, h('small', {}, state.me.admin ? 'Planer' : 'Mitarbeiter'));
+  render();
+}

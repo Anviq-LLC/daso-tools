@@ -18,3 +18,6 @@
 .topnavbuttons .navbtn:hover{background:none;color:var(--accent);border-bottom-color:var(--amber)}
 .topnavbuttons .navbtn.active{background:none;color:var(--accent);border-bottom-color:var(--amber);font-weight:600}
 @media(max-width:900px){.apptop{min-height:0}.topnavbuttons .navbtn{min-height:44px;padding:0 12px}}
+/* layout like the other apps: tabs beside the logo, user at the far right */
+.topnavbuttons{margin-left:0}
+.topnavbuttons + *{margin-left:auto}
