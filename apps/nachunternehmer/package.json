@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.13.0" },
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
+    "typecheck": "node scripts/check-syntax.mjs",
     "test": "node --test tests/*.test.mjs",
+    "build": "wrangler deploy --dry-run --outdir .wrangler/build",
     "dev": "wrangler dev --local --var DEV_IDENTITY:1",
     "deploy": "wrangler deploy"
   },
-  "devDependencies": { "wrangler": "^4.159.0" }
+  "devDependencies": {
+    "wrangler": "^4.159.0"
+  },
+  "packageManager": "pnpm@12.18.0"
 }
