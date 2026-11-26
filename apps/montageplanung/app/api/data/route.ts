@@ -1,5 +1,6 @@
-import { db, currentUser, dataVersion, bumpVersion, readNuFirms, type CurrentUser } from '@/db/raw';
-import { nuFirmName } from '@/lib/nu-firms';
+import { db, currentUser, dataVersion, bumpVersion, readNuFirms, readMitarbeiter, type CurrentUser } from '@/db/raw';
+import { employeeMirror } from '@/lib/employee-mirror';
+import { nuFirmName, contractorRenames } from '@/lib/nu-firms';
 import { z } from 'zod';
 import { workdays } from '@/lib/workdays';
 const id=z.string().uuid();
@@ -34,7 +35,40 @@ async function writeAudit(d:D1Database,user:CurrentUser,b:any,target:string){
   const action=b.action==='archiveResource'?(b.archived?'archiveResource':'restoreResource'):b.action==='archiveProject'?(b.archived?'archiveProject':'restoreProject'):b.action==='delete'?(b.kind==='resource'?'deleteResource':'deleteProject'):b.action==='decideVacation'?(b.approve?'approveVacation':'rejectVacation'):b.action;
   try{await d.prepare('INSERT INTO audit_log(id,at,actor_email,actor_name,action,target) VALUES(?,?,?,?,?,?)').bind(crypto.randomUUID(),new Date().toISOString(),user.email,user.name,action,target.slice(0,300)).run()}catch(e){console.error(e)}
 }
-export async function GET(r:Request){const user=await currentUser(r);if(!user)return out({error:'Bitte anmelden oder an den Administrator wenden, falls kein Zugang eingerichtet ist.'},401);try{const d=db();const ver=await dataVersion(),known=new URL(r.url).searchParams.get('v');if(ver!==null&&known===String(ver))return out({unchanged:true});const results=await d.batch([d.prepare('SELECT * FROM resources ORDER BY sort_order ASC, name ASC'),...['customers','contacts','projects','assignments','documents','punches','day_entries'].map(t=>d.prepare(t==='projects'?'SELECT * FROM projects ORDER BY sort_order ASC, name ASC':`SELECT * FROM ${t}`))]);const full=Object.fromEntries(['resources','customers','contacts','projects','assignments','documents','punches','day_entries'].map((t,i)=>[t,results[i].results as any[]]));const vac=await (user.accessRole==='planer'?d.prepare('SELECT * FROM vacation_requests ORDER BY created_at DESC LIMIT 300'):d.prepare('SELECT * FROM vacation_requests WHERE resource_id=? ORDER BY created_at DESC LIMIT 100').bind(user.resourceId||'')).all().catch(()=>({results:[]}));return out({version:ver,...scopeData(full,user),vacation_requests:vac.results,users:user.accessRole==='planer'?(await d.prepare('SELECT id,email,name,access_role,resource_id FROM users ORDER BY name').all()).results:[],audit:user.accessRole==='planer'?(await d.prepare('SELECT id,at,actor_name,actor_email,action,target FROM audit_log ORDER BY at DESC LIMIT 200').all()).results:[],me:{accessRole:user.accessRole,resourceId:user.resourceId,name:user.name}})}catch(e){console.error(e);return out({error:'Daten konnten nicht geladen werden. Bitte erneut versuchen.'},503)}}
+// Once the Mitarbeiter tool is in charge, planning rows follow it at most every two minutes.
+let lastMirror=0;
+async function mirrorEmployees(d:D1Database){
+ if(Date.now()-lastMirror<120_000)return false;lastMirror=Date.now();
+ try{const ma=await readMitarbeiter();if(!ma.master)return false;
+  const [rows,planers]=await Promise.all([d.prepare('SELECT id,kind,name,role,archived_at FROM resources').all<any>(),d.prepare("SELECT resource_id FROM users WHERE access_role='planer' AND resource_id IS NOT NULL").all<{resource_id:string}>()]);
+  const steps=employeeMirror(rows.results,ma.employees,new Set(planers.results.map(r=>r.resource_id)),new Date().toISOString());
+  if(!steps.length)return false;
+  await d.batch(steps.map(s=>s.op==='insert'?d.prepare("INSERT INTO resources(id,name,kind,role,archived_at) VALUES(?,?,'employee',?,?)").bind(s.id,s.name,s.role,s.archived_at):d.prepare("UPDATE resources SET name=?,role=?,archived_at=? WHERE id=? AND kind='employee'").bind(s.name,s.role,s.archived_at,s.id)));return true;
+ }catch(e){console.error(e);return false}
+}
+// With the Mitarbeiter tool in charge, people are created, renamed, archived and deleted there; logins stay here.
+async function employeeGuard(d:D1Database,b:any):Promise<Response|null>{
+ if(!['resource','archiveResource','employee','delete'].includes(b.action))return null;
+ if(!(await readMitarbeiter()).master)return null;
+ const refuse=()=>out({error:'Mitarbeiter werden im Mitarbeiter-Tool gepflegt.'},409);
+ const isEmployee=async()=>(await d.prepare("SELECT 1 AS n FROM resources WHERE id=? AND kind='employee'").bind(String(b.id||'')).first())!==null;
+ if(b.action==='resource')return b.kind==='employee'?refuse():null;
+ if(b.action==='archiveResource')return await isEmployee()?refuse():null;
+ if(b.action==='delete')return b.kind==='resource'&&await isEmployee()?refuse():null;
+ const row=b.id?await d.prepare("SELECT name,role FROM resources WHERE id=? AND kind='employee'").bind(String(b.id)).first<{name:string;role:string}>():null;
+ if(!row)return refuse();
+ b.name=row.name;b.role=row.role;return null;
+}
+// Firms renamed in the nachunternehmer tool (old name kept as alias) are renamed here too, at most every two minutes.
+let lastAlign=0;
+async function alignContractors(d:D1Database){
+ if(Date.now()-lastAlign<120_000)return false;lastAlign=Date.now();
+ try{const nu=await readNuFirms();if(!nu.master)return false;
+  const rows=(await d.prepare("SELECT id,name FROM resources WHERE kind='contractor' AND archived_at IS NULL").all<{id:string;name:string}>()).results,renames=contractorRenames(rows,nu.firms);
+  if(!renames.length)return false;await d.batch(renames.map(x=>d.prepare('UPDATE resources SET name=? WHERE id=?').bind(x.name,x.id)));return true;
+ }catch(e){console.error(e);return false}
+}
+export async function GET(r:Request){const user=await currentUser(r);if(!user)return out({error:'Bitte anmelden oder an den Administrator wenden, falls kein Zugang eingerichtet ist.'},401);try{const d=db();if(user.accessRole==='planer'&&(await alignContractors(d)||await mirrorEmployees(d)))await bumpVersion(new Response());const ver=await dataVersion(),known=new URL(r.url).searchParams.get('v');if(ver!==null&&known===String(ver))return out({unchanged:true});const results=await d.batch([d.prepare('SELECT * FROM resources ORDER BY sort_order ASC, name ASC'),...['customers','contacts','projects','assignments','documents','punches','day_entries'].map(t=>d.prepare(t==='projects'?'SELECT * FROM projects ORDER BY sort_order ASC, name ASC':`SELECT * FROM ${t}`))]);const full=Object.fromEntries(['resources','customers','contacts','projects','assignments','documents','punches','day_entries'].map((t,i)=>[t,results[i].results as any[]]));const vac=await (user.accessRole==='planer'?d.prepare('SELECT * FROM vacation_requests ORDER BY created_at DESC LIMIT 300'):d.prepare('SELECT * FROM vacation_requests WHERE resource_id=? ORDER BY created_at DESC LIMIT 100').bind(user.resourceId||'')).all().catch(()=>({results:[]}));return out({version:ver,...scopeData(full,user),vacation_requests:vac.results,users:user.accessRole==='planer'?(await d.prepare('SELECT id,email,name,access_role,resource_id FROM users ORDER BY name').all()).results:[],audit:user.accessRole==='planer'?(await d.prepare('SELECT id,at,actor_name,actor_email,action,target FROM audit_log ORDER BY at DESC LIMIT 200').all()).results:[],me:{accessRole:user.accessRole,resourceId:user.resourceId,name:user.name}})}catch(e){console.error(e);return out({error:'Daten konnten nicht geladen werden. Bitte erneut versuchen.'},503)}}
 function scopeData(full:Record<string,any[]>,user:CurrentUser){
   if(user.accessRole==='planer')return full;
   if(user.accessRole==='obermonteur')return {...full,punches:full.punches.filter(p=>p.resource_id===user.resourceId),day_entries:full.day_entries.filter(e=>e.resource_id===user.resourceId)};
@@ -54,6 +88,7 @@ export async function POST(r:Request){return bumpVersion(await handlePost(r))}
 async function handlePost(r:Request){const user=await currentUser(r);if(!user)return out({error:'Nicht angemeldet.'},401);if(r.headers.get('origin')&&r.headers.get('origin')!==new URL(r.url).origin)return out({error:'Anfrage abgelehnt.'},403);try{const b=z.object({action:z.string()}).passthrough().parse(await r.json()),d=db();
 if(managementActions.has(b.action)&&(user.accessRole==='monteur'||user.accessRole==='buchhaltung'))return out({error:'Keine Berechtigung.'},403);
 if((b.action==='archiveResource'||b.action==='employee'||b.action==='decideVacation')&&user.accessRole!=='planer')return out({error:'Keine Berechtigung.'},403);
+const locked=await employeeGuard(d,b);if(locked)return locked;
 const auditLabel=logged.has(b.action)?await auditTarget(d,b):'';
 if(b.action==='user'||b.action==='deleteUser'){if(user.accessRole!=='planer')return out({error:'Keine Berechtigung.'},403);
 if(b.action==='user'){const v=z.object({id:id.optional(),email:z.string().email(),name:z.string().trim().min(1).max(120),accessRole,resourceId:id.nullable().optional()}).parse(b);const email=v.email.trim().toLowerCase();if(v.id===user.id&&v.accessRole!=='planer')return out({error:'Die eigene Planer-Rolle kann nicht geändert werden.'},400);if(v.resourceId&&await d.prepare('SELECT id FROM users WHERE resource_id=? AND id IS NOT ?').bind(v.resourceId,v.id||null).first())return out({error:'Dieser Mitarbeiter hat bereits einen Zugang.'},409);try{if(v.id)await d.prepare('UPDATE users SET email=?,name=?,access_role=?,resource_id=? WHERE id=?').bind(email,v.name,v.accessRole,v.resourceId||null,v.id).run();else await d.prepare('INSERT INTO users(id,email,name,access_role,resource_id) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),email,v.name,v.accessRole,v.resourceId||null).run()}catch{return out({error:'Diese E-Mail-Adresse hat bereits einen Zugang.'},409)}await writeAudit(d,user,b,auditLabel);return out({ok:true})}

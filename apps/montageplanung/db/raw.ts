@@ -13,6 +13,18 @@ export async function readNuFirms(): Promise<NuFirms> {
     return { master: true, firms: rows.filter((r) => r.name && !r.archived).map((r) => ({ name: r.name as string, aliases: r.aliases ? (JSON.parse(r.aliases) as string[]) : [] })) }
   } catch { return off }
 }
+// Read-only view of the Mitarbeiter tool. It counts only once its switch is on; any failure means "not in charge".
+export type MaEmployees = { master: boolean; employees: { id: string; name: string; role: string; archived_at: string | null }[] }
+export async function readMitarbeiter(): Promise<MaEmployees> {
+  const off: MaEmployees = { master: false, employees: [] }
+  try {
+    const ma = env.MA_DB
+    if (!ma) return off
+    const flag = await ma.prepare("SELECT value FROM settings WHERE key = 'master'").first<{ value: string }>()
+    if (flag?.value !== '1') return off
+    return { master: true, employees: (await ma.prepare('SELECT id, name, role, archived_at FROM employees').all<MaEmployees['employees'][number]>()).results }
+  } catch { return off }
+}
 export function bucket(): R2Bucket { if(!env.BUCKET) throw new Error('Dateispeicher nicht verfügbar'); return env.BUCKET; }
 // Bumped after every write so idle clients can skip the full reload. Table is created on first write.
 export async function dataVersion():Promise<number|null>{try{return (await db().prepare('SELECT v FROM data_version WHERE id=1').first<{v:number}>())?.v??null}catch{return null}}

@@ -9,7 +9,8 @@
   "observability": { "enabled": true },
   "d1_databases": [
     { "binding": "DB", "database_name": "daso-montageplanung", "database_id": "42f5d224-bb84-4fd2-a1f8-d6abfda88956" },
-    { "binding": "NU_DB", "database_name": "daso-nachunternehmer", "database_id": "086b2409-9985-4d43-9ce7-18867308ebd4" }
+    { "binding": "NU_DB", "database_name": "daso-nachunternehmer", "database_id": "086b2409-9985-4d43-9ce7-18867308ebd4" },
+    { "binding": "MA_DB", "database_name": "daso-mitarbeiter", "database_id": "53475a3c-50b6-443d-99ac-13f797869163" }
   ],
   "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "daso-montageplanung-files" }],
   "rules": [{ "type": "ESModule", "globs": ["**/*.js", "**/*.mjs"] }],
