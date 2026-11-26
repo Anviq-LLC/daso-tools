@@ -9,5 +9,6 @@ Workers Builds only sees one app folder, so the file is copied into each app and
 
 Change a value in `design/daso-tokens.css`, run the command, commit the copies.
 
-Header pattern for every app: logo, "DaSo Lüftungsbau" in bold and the app name below it, and a page title of
-the form "DaSo · App".
+Header pattern for every app: logo, then "DaSo Lüftungsbau" in bold with the app name below it (hidden below
+1400px wide, as in Lohn and Dashboard), and a page title of the form "DaSo · App". Navigation is text tabs in the
+muted color; the active tab is violet with an amber underline.
