@@ -48,6 +48,8 @@ The Aufmass calculation code is vendored with `pnpm sync:aufmass` so both tools 
 
 ## Deploy
 
+Pushes to main deploy through Cloudflare Workers Builds. `wrangler.jsonc` applies the D1 migrations on the main branch only, so the deploy command stays `npx wrangler deploy`. Manual deploy:
+
 ```
 pnpm exec wrangler d1 migrations apply DB --remote
 pnpm exec wrangler deploy

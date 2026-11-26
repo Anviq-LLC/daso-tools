@@ -2,6 +2,7 @@
   "name": "daso-nachunternehmer",
   "account_id": "de81ba1a2e7bae6a87821b398353b8dd",
   "main": "src/worker.js",
+  "build": { "command": "node scripts/migrate.mjs" },
   "compatibility_date": "2026-05-15",
   "preview_urls": false,
   "observability": { "enabled": true },
