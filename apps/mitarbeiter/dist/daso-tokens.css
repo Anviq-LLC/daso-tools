@@ -1,0 +1,26 @@
+/* Shared DaSo design tokens. Edit here, then run `node design/sync.mjs` to copy the file into every app. */
+:root {
+  --bg: #f6f8fb;
+  --panel: #fff;
+  --head: #f9fafc;
+  --ink: #17233a;
+  --muted: #69778d;
+  --line: #e0e6ee;
+
+  --accent: #492ade;
+  --accent-ink: #fff;
+  --soft: #f2efff;
+  --focus: #9b8aef;
+
+  --ok: #258460;
+  --amber: #f5a845;
+  --err: #bd3747;
+  --green: var(--ok);
+  --orange: var(--amber);
+  --red: var(--err);
+
+  --radius: 8px;
+  --radius-lg: 11px;
+  --shadow: 0 1px 2px #17233a0d, 0 8px 24px #17233a12;
+  --font: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
