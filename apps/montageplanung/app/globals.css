@@ -172,3 +172,5 @@ html,body{overflow-x:hidden;max-width:100vw}body{margin:0;font-family:"IBM Plex 
 .dropzone .dz-file{color:#17233a;font-weight:600;font-size:13px;overflow-wrap:anywhere}
 .dropzone .dz-touch{display:none}
 @media (hover:none){.dropzone .dz-desktop{display:none}.dropzone .dz-touch{display:inline}.dropzone{padding:26px 14px}}
+/* The count badge is a pill; the long label next to it is plain text that may wrap instead of spilling out of the cell. */
+.schedule th.person-col .full-label{white-space:normal;border:0;border-radius:0;padding:0;margin:0 6px 4px 0;font-size:11px;letter-spacing:.8px;line-height:1.4;vertical-align:middle;color:#708099}
