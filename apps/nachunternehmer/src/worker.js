@@ -82,6 +82,12 @@ export default {
       return json({ error: 'Kein Zugriff.' }, 403);
     }
 
+    // Projects come live from the Einteilung; the static snapshot is only the fallback.
+    if (path === '/api/plan-projects' && request.method === 'GET') {
+      const rows = env.PLAN ? (await env.PLAN.prepare('SELECT id, name, project_number, address, archived_at FROM projects ORDER BY name').all().catch(() => ({ results: [] }))).results : [];
+      return json({ source: 'montageplanung', fetchedAt: new Date().toISOString(), projects: rows });
+    }
+
     if (path === '/api/state') {
       if (request.method === 'GET') {
         const { state, token } = await loadState(env.DB), { state: ratings } = await loadRow(env.DB, 'ratings');
