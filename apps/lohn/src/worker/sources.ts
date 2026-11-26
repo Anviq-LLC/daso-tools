@@ -2,6 +2,7 @@ import type { Record_ } from '../import/aufmass.ts';
 import type { Assignment, DayEntry, Punch } from '../import/plan.ts';
 import { HttpError, readOnly, type Env } from './auth.ts';
 import type { DateRange } from '../calc/nu-periods.ts';
+import { officeRows } from './office-feed.ts';
 
 export type Employee = { id: string; name: string; role: string };
 export type PlanProject = { id: string; name: string; foreman_id: string | null };
@@ -43,7 +44,8 @@ export function databaseSources(env: Env): PayrollSources {
       plan.prepare('SELECT resource_id, project_id, day, assignment_type FROM assignments WHERE day >= ? AND day <= ?').bind(from, to).all<Assignment>(),
       plan.prepare('SELECT resource_id, day, data FROM day_entries WHERE day >= ? AND day <= ?').bind(from, to).all<DayEntry>(),
     ]);
-    return { assignments: assignments.results, entries: entries.results };
+    const office = await officeRows(env.MA_DB, await employees(), { from, to });
+    return { assignments: [...office.assignments, ...assignments.results], entries: entries.results };
   };
   return {
     employees,
@@ -57,7 +59,8 @@ export function databaseSources(env: Env): PayrollSources {
         plan.prepare('SELECT id, name, foreman_id FROM projects').all<PlanProject>(),
         aufmass.prepare("SELECT id, kind, data FROM records WHERE kind = 'project' OR (kind = 'report' AND json_extract(data, '$.date') <= ? AND COALESCE(json_extract(data, '$.endDate'), json_extract(data, '$.date')) >= ?)").bind(reportTo, reportFrom).all<Record_>(),
       ]);
-      return { employees: resources, ...days, punches: punches.results, projects: projects.results, records: records.results };
+      const office = await officeRows(env.MA_DB, resources, { from: first, to: last }, { from: punchFrom, to: punchTo });
+      return { employees: resources, ...days, punches: [...punches.results, ...office.punches], projects: projects.results, records: records.results };
     },
   };
 }
