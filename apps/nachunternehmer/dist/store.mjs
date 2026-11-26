@@ -10,7 +10,14 @@ export async function loadRemote() {
   const j = await res.json();
   remote = true;
   token = j.token;
-  return { state: j.state };
+  return { state: j.state, mode: j.mode || 'full' };
+}
+
+// Ratings have their own save path, so rating someone never changes the token of the main state.
+export async function putRating(id, assessment) {
+  if (!remote) return;
+  const res = await fetch('/api/ratings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, assessment }) });
+  if (!res.ok) throw new Error(((await res.json().catch(() => ({}))).error) || 'Speichern fehlgeschlagen (' + res.status + ')');
 }
 
 function lock() {
