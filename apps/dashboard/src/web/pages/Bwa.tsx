@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import readXlsxFile from 'read-excel-file';
 import { api, money, monthLabel, toCents } from '../api.ts';
 import { linesFromRows, pdfLines, type Line } from '../../calc/bwa.ts';
 import { readAccountingPdf } from '../accounting-pdf-read.ts';
 import { BwaTable } from './BwaTable.tsx';
+import { FileDrop } from '../FileDrop.tsx';
 import type { AccountingReport } from '../../calc/accounting-pdf.ts';
 import type { Me } from '../types.ts';
 
@@ -34,8 +35,7 @@ export function Bwa({ me, month, onChange }: { me: Me; month: string; onChange: 
     if (!lines.length) return setErr('Keine Zeilen erkannt. Bitte Datei prüfen.');
     try { const r = await api<{ id: string }>('/api/bwa/import', { method: 'POST', json: { ...as, filename, format, lines, file, report } }); await open(r.id); load(); } catch (e) { fail(e); }
   };
-  const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]; e.target.value = '';
+  const onFile = async (f?: File) => {
     if (!f) return;
     try {
       const name = f.name.toLowerCase();
@@ -78,8 +78,8 @@ export function Bwa({ me, month, onChange }: { me: Me; month: string; onChange: 
         <div className="row">
           <label>Periode<input type="month" value={period} onChange={(e) => e.target.value && setPeriod(e.target.value)} /></label>
           <label>Typ<select value={kind} onChange={(e) => setKind(e.target.value as 'bwa' | 'susa')}><option value="bwa">BWA</option><option value="susa">SuSa</option></select></label>
-          {allowed && <label>Datei (pdf, xlsx, csv)<input type="file" accept=".xlsx,.csv,.pdf" onChange={onFile} /></label>}
         </div>
+        {allowed && <FileDrop accept=".xlsx,.csv,.pdf" title="BWA oder SuSa hochladen" hint="PDF, XLSX oder CSV" onFiles={([f]) => onFile(f)} onReject={() => setErr('Bitte .xlsx, .csv oder .pdf wählen.')} />}
         <small className="muted">BWA und SuSa derselben Periode werden nie addiert; ein erneuter Import erzeugt eine neue Version. Jeder Import wird erst nach der Prüfung der Kontenzuordnung übernommen. Das Standard-Mapping ist ein Startpunkt und muss mit echten Dateien des Steuerberaters geprüft werden.</small>
         <div className="scroll"><table><thead><tr><th>Typ</th><th>Version</th><th>Datei</th><th>Importiert</th><th>Status</th><th>Offen</th><th></th></tr></thead><tbody>
           {list.map((i) => <tr key={i.id}><td>{i.kind.toUpperCase()}</td><td>{i.version}</td><td>{i.filename}</td><td>{new Date(i.imported_at).toLocaleString('de-DE')} · {i.imported_by}</td><td>{i.status}</td><td className={i.unmapped ? 'err' : ''}>{i.unmapped}</td><td><button className="btn" onClick={() => open(i.id)}>Prüfen</button>{allowed && <> <button className="btn" onClick={() => remove(i)}>Löschen</button></>}</td></tr>)}
