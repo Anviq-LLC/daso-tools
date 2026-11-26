@@ -2,6 +2,14 @@
 
 Isolierter Prototyp zur Einbettung durch euren Entwickler. Originaltools und Quelldatenbank bleiben unverändert.
 
+## Run
+
+    pnpm install
+    pnpm dev         # local worker
+    pnpm typecheck   # syntax check
+    pnpm test
+    pnpm build       # dry run, deploys nothing
+
 ## Aktueller Stand
 
 Die aktualisierte API liefert jetzt unter **GET /api/sub-teams?month=YYYY-MM** echte Teams, Tagesstunden, Personen, Projekte, Umsätze und Kosten. Oktober und November 2026 wurden ausschließlich lesend übernommen. Der Einteilungs-Projektstamm ist seit v10 über den vorhandenen GET /api/catalog verfügbar (siehe integration/Projektstamm.md). Der statische Prototyp verwendet den aktuellen datierten Snapshot, keinen laufenden Live-Abruf. Für laufende Synchronisierung serverseitigen Proxy wie unter `integration/` anbinden; API-Schlüssel niemals ins Frontend.
