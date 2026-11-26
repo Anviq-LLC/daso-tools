@@ -10,6 +10,7 @@ dependencies, Cloudflare Worker and deploy settings.
 | `apps/lohn` | daso-lohntool | Payroll preparation |
 | `apps/dashboard` | daso-admin-dashboard, daso-data-api | Revenue and cost reporting |
 | `apps/nachunternehmer` | daso-nachunternehmer | Subcontractor handling |
+| `apps/mitarbeiter` | daso-mitarbeiter | Employee master data |
 
 Run and deploy commands are in each app's README. Deployment runs through Cloudflare Workers Builds (see below). GitHub Actions in
 `.github/workflows` only run the tests, per app and only when files under that app change.

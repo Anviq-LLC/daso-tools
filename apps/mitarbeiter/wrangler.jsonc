@@ -1,0 +1,19 @@
+{
+  "name": "daso-mitarbeiter",
+  "account_id": "de81ba1a2e7bae6a87821b398353b8dd",
+  "main": "src/worker.js",
+  "build": { "command": "node scripts/migrate.mjs" },
+  "compatibility_date": "2026-05-15",
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "assets": { "directory": "dist", "binding": "ASSETS", "run_worker_first": true },
+  "vars": {
+    "CF_ACCESS_TEAM_DOMAIN": "dasoluft.cloudflareaccess.com",
+    "MA_ALLOWED_EMAILS": "enriquevoss@gmail.com,daso@dasoluft.com,pankratz@dasoluft.com",
+    "CF_ACCESS_AUD": "dfad2cfa91680d5746bc80f323f87142193f238f30520ce520f1a9c785764c44"
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "daso-mitarbeiter", "database_id": "53475a3c-50b6-443d-99ac-13f797869163", "migrations_dir": "migrations" },
+    { "binding": "PLAN", "database_name": "daso-montageplanung", "database_id": "42f5d224-bb84-4fd2-a1f8-d6abfda88956" }
+  ]
+}
