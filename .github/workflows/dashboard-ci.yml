@@ -2,9 +2,33 @@ name: dashboard-ci
 on:
   push:
     branches: [main]
-    paths: ['apps/dashboard/**', '.github/workflows/dashboard-ci.yml']
+    paths:
+      - 'apps/dashboard/**'
+      - '.github/workflows/dashboard-ci.yml'
+      - 'apps/montageplanung/db/schema.ts'
+      - 'apps/montageplanung/drizzle/**'
+      - 'apps/aufmass/db/schema.ts'
+      - 'apps/aufmass/drizzle/**'
+      - 'apps/aufmass/lib/types.ts'
+      - 'apps/aufmass/lib/business.ts'
+      - 'apps/aufmass/lib/employees.ts'
+      - 'apps/aufmass/lib/report-crews.ts'
+      - 'apps/aufmass/lib/time-reports.ts'
+      - 'apps/aufmass/lib/ids.ts'
   pull_request:
-    paths: ['apps/dashboard/**', '.github/workflows/dashboard-ci.yml']
+    paths:
+      - 'apps/dashboard/**'
+      - '.github/workflows/dashboard-ci.yml'
+      - 'apps/montageplanung/db/schema.ts'
+      - 'apps/montageplanung/drizzle/**'
+      - 'apps/aufmass/db/schema.ts'
+      - 'apps/aufmass/drizzle/**'
+      - 'apps/aufmass/lib/types.ts'
+      - 'apps/aufmass/lib/business.ts'
+      - 'apps/aufmass/lib/employees.ts'
+      - 'apps/aufmass/lib/report-crews.ts'
+      - 'apps/aufmass/lib/time-reports.ts'
+      - 'apps/aufmass/lib/ids.ts'
 jobs:
   test:
     runs-on: ubuntu-latest
