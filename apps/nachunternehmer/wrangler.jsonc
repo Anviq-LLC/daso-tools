@@ -9,7 +9,7 @@
   "assets": { "directory": "dist", "binding": "ASSETS", "run_worker_first": true },
   "vars": {
     "CF_ACCESS_TEAM_DOMAIN": "dasoluft.cloudflareaccess.com",
-    "NU_ALLOWED_EMAILS": "enriquevoss@gmail.com,daso@dasoluft.com",
+    "NU_ALLOWED_EMAILS": "enriquevoss@gmail.com,daso@dasoluft.com,pankratz@dasoluft.com",
     "CF_ACCESS_AUD":"dfad2cfa91680d5746bc80f323f87142193f238f30520ce520f1a9c785764c44"
   },
   "d1_databases": [

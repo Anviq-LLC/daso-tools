@@ -30,7 +30,10 @@ export function parseContract(text) {
   if (party.length) {
     company.name = party[0];
     company.owner = party.find(line => /^(?:Vertreten durch|Inhaber|Geschäftsführung)\s*:/i.test(line))?.split(':').slice(1).join(':').trim();
-    const contacts = party.slice(1).filter(line=>!/^(?:Vertreten durch|Inhaber|Geschäftsführung)\s*:/i.test(line));
+    // Without an owner label, a second line without digits is the person behind the firm name.
+    const person = !company.owner && party[1] && !/[\d@]|^(?:Tel|Mobil)/i.test(party[1]) ? party[1] : undefined;
+    if (person) company.owner = person;
+    const contacts = party.slice(1).filter(line=>line!==person&&!/^(?:Vertreten durch|Inhaber|Geschäftsführung)\s*:/i.test(line));
     company.email = contacts.join(' ').match(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i)?.[0];
     company.address = contacts.filter(line=>!line.includes('@')&&!/^(?:Tel|Mobil)[:.]/i.test(line)).join('\n');
     const country = Object.keys(countryCodes).find(name => company.address.endsWith(name));
@@ -40,7 +43,7 @@ export function parseContract(text) {
   const terms = {};
   const pay = flat.match(/(?:Rechnungsstellung und Zahlungen|Zahlungsbedingungen)([\s\S]*?)(?:Ansprechpartner\s*\/|§\s*5\b|$)/i)?.[1] ?? flat;
   const net = pay.match(new RegExp(days+'\\s+netto','i'));
-  const discount = pay.match(new RegExp(days+'\\s+mit\\s+'+percent+'\\s*Skonto','i'));
+  const discount = pay.match(new RegExp(days+'\\s+(?:mit\\s+)?'+percent+'\\s*Skonto','i'));
   if (net) terms.netDays = Number(net[1]);
   if (discount) {
     terms.discountDays = Number(discount[1]);
@@ -48,11 +51,19 @@ export function parseContract(text) {
   }
   const hold = pay.match(new RegExp('Sicherheitseinbehalt\\s+in Höhe von\\s+'+percent,'i'));
   if (hold) terms.retentionPercent = Number(hold[1].replace(',','.'));
-  const until = flat.match(/(?:befristet\s+bis\s+zum|bis\s+zum)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+befristet)?/i);
+  else if (/Sicherheitseinbehalt[^.]{0,60}erfolgt\s+nicht/i.test(pay)) terms.retentionPercent = 0;
+  const date = '(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})';
+  const until = flat.match(new RegExp('befristet\\s+bis\\s+(?:zum\\s+)?'+date,'i')) ?? flat.match(new RegExp('bis\\s+zum\\s+'+date+'\\s+befristet','i')) ?? flat.match(new RegExp('bis\\s+zum\\s+'+date,'i'));
   if (until) terms.contractUntil = [until[3],until[2].padStart(2,'0'),until[1].padStart(2,'0')].join('-');
+  const notes = [];
   if (/Vergütung erfolgt grundsätzlich als Pauschalvergütung/i.test(flat)) {
-    terms.termsNote = 'Pauschalvergütung für vereinbarte Teilleistungen. Stundensätze dienen der Kalkulation.';
+    notes.push('Pauschalvergütung für vereinbarte Teilleistungen. Stundensätze dienen der Kalkulation.');
   }
+  const share = flat.match(/Projektbeteiligung[^%]{0,60}?(\d{1,2}(?:[,.]\d{1,2})?)\s*%/i);
+  if (share) notes.push('Projektbeteiligung ' + Number(share[1].replace(',','.')) + ' % vom Gewinn.');
+  const splits = [...flat.matchAll(/(\d{2})\s*%\s*für die NU und (\d{2})\s*%\s*für den AN/gi)];
+  if (splits.length) notes.push('Aufteilung bei eigenen Monteuren (NU/AN): ' + splits.map(m => m[1]+'/'+m[2]).join(', ') + ' %.');
+  if (notes.length) terms.termsNote = notes.join(' ');
   const rates = {};
   const projectRates = [];
   const ratePattern = /^(?:[•–-]\s*)?(Projekt\s+([^:]+)|Obermonteur[^:]*|Monteur[^:]*)\s*:\s*([\d.]+,\d{2}|\d+(?:\.\d{1,2})?)\s*€(?:\s*\/\s*(?:Stunde|Std\.?|h))?/i;
@@ -61,6 +72,11 @@ export function parseContract(text) {
     if (!rate) continue;
     if (rate[2]) projectRates.push({project:rate[2].trim(),fitterRate:amount(rate[3])});
     else rates[/^Obermonteur/i.test(rate[1])?'foremanRate':'fitterRate'] = amount(rate[3]);
+  }
+  if (!projectRates.length && rates.fitterRate == null && rates.foremanRate == null) {
+    // One hourly rate in a Bauleitung contract is the foreman rate. The Monteur rate stays open.
+    const hourly = flat.match(/(\d{1,3}(?:\.\d{3})*,\d{2})\s*(?:€|EUR|[^\d\s])?\s*pro\s+Stunde/i);
+    if (hourly) rates.foremanRate = amount(hourly[1]);
   }
   const title = lines.findIndex(line => /^(?:\d+[.)]?\s*)?Bauvorhaben\s*:\s*$/i.test(line));
   const projectLines = title >= 0 ? lines.slice(title+1).filter(Boolean) : [];

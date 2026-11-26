@@ -33,6 +33,26 @@ async function toCanvas(file) {
   return c;
 }
 
+// Text of a scanned PDF, up to 10 pages. onPage(done, total) reports progress.
+export async function ocrPdfText(file, onPage = () => {}) {
+  const w = await engine();
+  const pdfjs = await import('./vendor/pdf.min.mjs');
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL('./vendor/pdf.worker.min.mjs', import.meta.url).href;
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false }).promise;
+  try {
+    const total = Math.min(pdf.numPages, 10);
+    let text = '';
+    for (let i = 1; i <= total; i++) {
+      onPage(i - 1, total);
+      const page = await pdf.getPage(i), vp = page.getViewport({ scale: 2.5 }), c = document.createElement('canvas');
+      c.width = vp.width; c.height = vp.height;
+      await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      text += (await w.recognize(c)).data.text + '\n';
+    }
+    return text;
+  } finally { await pdf.destroy(); }
+}
+
 // Returns { text, identity }. The MRZ strip at the bottom gets a second, restricted pass.
 export async function scanDocument(file) {
   const w = await engine(), c = await toCanvas(file);
