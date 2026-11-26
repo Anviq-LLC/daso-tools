@@ -118,7 +118,7 @@ fieldset label { display: grid; grid-template-columns: 1fr 110px; gap: 8px; alig
 /* Shared look: same page label, cards, table headers and focus ring as Aufmass, Montageplanung and Nachunternehmer */
 :root { --shadow: 0 1px 2px #17233a0d, 0 8px 24px #17233a12; --focus: #9b8aef; }
 h1::before { content: "DASO · LOHNVORBEREITUNG"; display: block; font-size: 10px; font-weight: 600; letter-spacing: 1.8px; color: var(--accent); margin-bottom: 9px; }
-h1 { font-size: 24px; margin: 4px 0 22px; }
+h1 { font-size: 26px; margin: 4px 0 0; }
 .scroll, fieldset { box-shadow: var(--shadow); }
 .scroll { scrollbar-width: thin; }
 fieldset { padding: 18px 20px 20px; gap: 12px; }
@@ -126,7 +126,21 @@ legend { padding: 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .4px
 thead th { padding: 12px 14px; font-size: 11px; font-weight: 600; letter-spacing: .3px; color: var(--muted); }
 tbody th, tfoot th, td { padding: 9px 14px; }
 button, .btn { border-radius: 8px; transition: border-color .12s, background-color .12s; }
-button:hover:not(:disabled), .btn:hover { border-color: var(--accent); }
+button:hover:not(:disabled):not(.tab), .btn:hover { border-color: var(--accent); }
 button.primary:hover:not(:disabled) { filter: brightness(1.08); }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+/* Same structure as the Dashboard: even rhythm between sections, filter row as a bordered bar, bordered status chips */
+main > * + *, .month-page > * + * { margin-top: 22px; }
+main > h1 + *, .month-page > h1 + * { margin-top: 18px; }
+h2 { font-weight: 650; margin: 0 0 12px; }
+.toolbar { background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 12px 16px; margin-bottom: 0; box-shadow: var(--shadow); }
+.toolbar label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+.toolbar input, .toolbar select { height: 36px; padding: 0 10px; }
+.chip { display: inline-block; padding: 2px 10px; border: 1px solid var(--line); font-size: 12px; }
+th, td { padding: 10px 14px; }
+tfoot td, tfoot th { border-top: 2px solid var(--line); font-weight: 700; }
+h1 + * { margin-top: 18px; }
+.tab { transition: none; }
+.toolbar + * { margin-top: 18px; }
