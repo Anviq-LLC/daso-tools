@@ -114,3 +114,19 @@ fieldset label { display: grid; grid-template-columns: 1fr 110px; gap: 8px; alig
 .bonus-tiers { margin-top: 8px; }
 .bonus-calculation-note { font-size: 12px; font-weight: 400; white-space: normal; }
 @media (max-width: 720px) { .bonus-columns { grid-template-columns: minmax(0, 1fr); } }
+
+/* Shared look: same page label, cards, table headers and focus ring as Aufmass, Montageplanung and Nachunternehmer */
+:root { --shadow: 0 1px 2px #17233a0d, 0 8px 24px #17233a12; --focus: #9b8aef; }
+h1::before { content: "DASO · LOHNVORBEREITUNG"; display: block; font-size: 10px; font-weight: 600; letter-spacing: 1.8px; color: var(--accent); margin-bottom: 9px; }
+h1 { font-size: 24px; margin: 4px 0 22px; }
+.scroll, fieldset { box-shadow: var(--shadow); }
+.scroll { scrollbar-width: thin; }
+fieldset { padding: 18px 20px 20px; gap: 12px; }
+legend { padding: 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; color: var(--muted); }
+thead th { padding: 12px 14px; font-size: 11px; font-weight: 600; letter-spacing: .3px; color: var(--muted); }
+tbody th, tfoot th, td { padding: 9px 14px; }
+button, .btn { border-radius: 8px; transition: border-color .12s, background-color .12s; }
+button:hover:not(:disabled), .btn:hover { border-color: var(--accent); }
+button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
