@@ -1,5 +1,6 @@
-import { loadState, saveState } from './state.js';
+import { loadState, saveState, loadRow, saveRow } from './state.js';
 import { directory } from './directory.js';
+import { withRatings, ratingsView, setRating } from './ratings.js';
 
 const b64 = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 const part = (s) => JSON.parse(new TextDecoder().decode(b64(s)));
@@ -11,7 +12,8 @@ async function accessEmail(request, env) {
   const [h, p, sig] = token.split('.');
   if (!sig) return '';
   try {
-    if (!jwks || Date.now() - jwks.at > 3_600_000) {
+    if (env.CF_ACCESS_JWKS) jwks = { keys: JSON.parse(env.CF_ACCESS_JWKS).keys, at: Date.now() };
+    else if (!jwks || Date.now() - jwks.at > 3_600_000) {
       const res = await fetch(`https://${env.CF_ACCESS_TEAM_DOMAIN}/cdn-cgi/access/certs`);
       jwks = { keys: (await res.json()).keys, at: Date.now() };
     }
@@ -27,24 +29,64 @@ async function accessEmail(request, env) {
 const json = (v, status = 200) => Response.json(v, { status, headers: { 'Cache-Control': 'no-store' } });
 const same = (a, b) => a.length === b.length && [...a].every((c, i) => c === b[i]);
 
+// Obermonteure get the ratings page only. Only code and styles are served to them, never the data snapshots.
+const ASSET = /.(mjs|js|css|html|png|svg|ico|woff2?|gz|wasm)$/;
+const isObermonteur = async (plan, email) => !!plan && !!(await plan.prepare("SELECT 1 AS ok FROM users WHERE lower(email) = ? AND access_role = 'obermonteur'").bind(email).first());
+
+async function saveRating(request, env, email) {
+  const text = await request.text();
+  let body;
+  try { body = text.length < 20_000 ? JSON.parse(text) : null; } catch { body = null; }
+  if (!body) return json({ error: 'Ungültige Anfrage.' }, 400);
+  for (let i = 0; i < 3; i++) {
+    const { state } = await loadState(env.DB), { state: ratings, token } = await loadRow(env.DB, 'ratings');
+    let next;
+    try { next = setRating(ratings || {}, state || {}, String(body.id || ''), body.assessment, email, new Date().toISOString()); } catch (e) { return json({ error: e.message }, 400); }
+    const r = await saveRow(env.DB, 'ratings', JSON.stringify(next), token, email);
+    if (r.status === 200) return json({ ok: true });
+    if (r.status !== 409) return json({ error: 'Nicht gespeichert.' }, r.status);
+  }
+  return json({ error: 'Gleichzeitig geändert. Bitte erneut speichern.' }, 409);
+}
+
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname;
     const allowed = String(env.NU_ALLOWED_EMAILS || '').toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
     const login = await accessEmail(request, env);
-    const email = login ? (allowed.includes(login) ? login : '') : (env.DEV_IDENTITY === '1' ? 'dev@localhost' : '');
-    if (!path.startsWith('/api/')) return email ? env.ASSETS.fetch(request) : new Response('Bitte anmelden.', { status: 401 });
+    let email = '', role = '';
+    if (login) {
+      if (allowed.includes(login)) { email = login; role = 'full'; }
+      else if (await isObermonteur(env.PLAN, login)) { email = login; role = 'ratings'; }
+    } else if (env.DEV_IDENTITY === '1') { email = 'dev@localhost'; role = env.DEV_ROLE === 'ratings' ? 'ratings' : 'full'; }
+    if (!path.startsWith('/api/')) {
+      if (!email) return new Response('Bitte anmelden.', { status: 401 });
+      if (role === 'ratings' && path !== '/' && !ASSET.test(path)) return new Response('Kein Zugriff.', { status: 403 });
+      return env.ASSETS.fetch(request);
+    }
 
     const bearer = (request.headers.get('authorization') || '').replace(/^Bearer /, '');
     const reader = !!env.NU_READ_TOKEN && same(bearer, env.NU_READ_TOKEN);
 
-    if (path === '/api/directory' && request.method === 'GET' && (email || reader)) {
+    if (path === '/api/directory' && request.method === 'GET' && (role === 'full' || reader)) {
       return json(directory((await loadState(env.DB)).state || {}));
     }
     if (!email) return json({ error: 'Bitte anmelden.' }, 401);
 
+    if (path === '/api/ratings' && request.method === 'PUT') return saveRating(request, env, email);
+    if (role !== 'full') {
+      if (path === '/api/state' && request.method === 'GET') {
+        const { state } = await loadState(env.DB), { state: ratings } = await loadRow(env.DB, 'ratings');
+        return json({ mode: 'ratings', state: ratingsView(withRatings(state, ratings || {})), token: '' });
+      }
+      return json({ error: 'Kein Zugriff.' }, 403);
+    }
+
     if (path === '/api/state') {
-      if (request.method === 'GET') return json(await loadState(env.DB));
+      if (request.method === 'GET') {
+        const { state, token } = await loadState(env.DB), { state: ratings } = await loadRow(env.DB, 'ratings');
+        return json({ mode: 'full', state: withRatings(state, ratings || {}), token });
+      }
       if (request.method === 'PUT') {
         const r = await saveState(env.DB, await request.text(), request.headers.get('if-match') || '', email);
         return json(r, r.status);

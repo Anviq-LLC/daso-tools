@@ -13,7 +13,8 @@
     "CF_ACCESS_AUD":"dfad2cfa91680d5746bc80f323f87142193f238f30520ce520f1a9c785764c44"
   },
   "d1_databases": [
-    { "binding": "DB", "database_name": "daso-nachunternehmer", "database_id": "086b2409-9985-4d43-9ce7-18867308ebd4", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "daso-nachunternehmer", "database_id": "086b2409-9985-4d43-9ce7-18867308ebd4", "migrations_dir": "migrations" },
+    { "binding": "PLAN", "database_name": "daso-montageplanung", "database_id": "42f5d224-bb84-4fd2-a1f8-d6abfda88956" }
   ],
   "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "daso-nachunternehmer-files" }]
 }
