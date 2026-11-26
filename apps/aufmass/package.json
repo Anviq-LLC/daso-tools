@@ -11,7 +11,8 @@
     "start": "wrangler dev --config dist/server/wrangler.json --local --persist-to .wrangler/state",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "test": "pnpm exec tsc --noEmit --pretty false && node tests/check.mjs"
+    "typecheck": "tsc --noEmit --pretty false",
+    "test": "node tests/check.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
