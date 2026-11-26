@@ -7,6 +7,7 @@
   "assets": { "directory": "dist/client" },
   "preview_urls": false,
   "observability": { "enabled": true },
+  "vars": { "DASO_PURGE_EMAILS": "daso@dasoluft.com,pankratz@dasoluft.com" },
   "d1_databases": [
     { "binding": "DB", "database_name": "daso-aufmass-eu", "database_id": "b7dcd995-d426-4809-bb1f-60ffe3d1513b" },
     { "binding": "PLAN_DB", "database_name": "daso-montageplanung", "database_id": "42f5d224-bb84-4fd2-a1f8-d6abfda88956" }

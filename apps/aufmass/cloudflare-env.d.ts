@@ -5,6 +5,7 @@ declare namespace Cloudflare {
     BUCKET?: R2Bucket;
     DASO_SETTINGS_KEY?: string;
     DASO_OWNER_EMAIL?: string;
+    DASO_PURGE_EMAILS?: string;
     DASO_CRON_SECRET?: string;
     DASO_DEV_IDENTITY?: string;
     DASO_INBOX_SERVICE_ENABLED?: string;

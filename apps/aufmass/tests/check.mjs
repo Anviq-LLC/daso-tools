@@ -25,7 +25,7 @@ const {PDFDocument}=require('pdf-lib');
 const nativeFetch=globalThis.fetch;globalThis.fetch=async url=>typeof url==='string'&&url.startsWith('/')?new Response(await readFile('public'+url)):nativeFetch(url);
 
 const script=await readFile(out+'/worker.mjs','utf8');
-const mf=new Miniflare({modules:true,script,bindings:{DASO_PLAN_SYNC_SECONDS:'0',DASO_OWNER_EMAIL:'test-user@example.invalid',...accessBindings,DASO_SETTINGS_KEY:Buffer.alloc(32,7).toString('base64')},d1Databases:['DB','PLAN_DB'],r2Buckets:['BUCKET'],compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat']});
+const mf=new Miniflare({modules:true,script,bindings:{DASO_PLAN_SYNC_SECONDS:'0',DASO_OWNER_EMAIL:'test-user@example.invalid',DASO_PURGE_EMAILS:'alex@example.invalid',...accessBindings,DASO_SETTINGS_KEY:Buffer.alloc(32,7).toString('base64')},d1Databases:['DB','PLAN_DB'],r2Buckets:['BUCKET'],compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat']});
 const db=await mf.getD1Database('DB'),plan=await mf.getD1Database('PLAN_DB');
 const sql=await readFile('drizzle/0000_hard_bill_hollister.sql','utf8');
 await plan.prepare("CREATE TABLE users (id text primary key, email text not null, name text not null default '', access_role text not null default 'monteur', resource_id text)").run();
@@ -48,7 +48,7 @@ const remove=async id=>mf.dispatchFetch('http://test/api/files?id='+id,{method:'
 
 try{
  assert.equal((await mf.dispatchFetch('http://test/api/data')).status,400,'anonymous');
- for(const [uid,role] of [['foreman','Obermonteur'],['worker','Monteur']])await db.prepare('INSERT INTO records VALUES (?,?,?,?,?)').bind('access:'+uid+'@example.invalid','access','system',JSON.stringify({role,name:'Test'}),new Date().toISOString()).run();
+ for(const [uid,role] of [['foreman','Obermonteur'],['alex','Obermonteur'],['worker','Monteur']])await db.prepare('INSERT INTO records VALUES (?,?,?,?,?)').bind('access:'+uid+'@example.invalid','access','system',JSON.stringify({role,name:'Test'}),new Date().toISOString()).run();
  await plan.prepare('INSERT INTO users (id,email,name,access_role) VALUES (?,?,?,?)').bind('book','book@example.invalid','Buchhaltung','buchhaltung').run();
  assert.equal((await mf.dispatchFetch('http://test/api/data',{headers:await as('worker@example.invalid')})).status,400,'Monteur has no access');
  assert.equal((await mf.dispatchFetch('http://test/api/data',{headers:await as('foreman@example.invalid')})).status,200,'Obermonteur reads');
@@ -81,7 +81,16 @@ try{
  await call('deleteReport',{id,updatedAt:report.updatedAt},400);
  await call('deleteReport',{id,updatedAt:report.updatedAt,reason:'falsche Baustelle'});
  assert(!(await state()).reports.some(r=>r.id===id),'deleted report is gone');
- console.log('PASS: roles (Planer, Obermonteur, Buchhaltung read-only), server-owned prices, finished Aufmaße stay editable, removed review/billing/dispatch actions, deletion with reason.');
+ const archiveOf=async who=>(await(await mf.dispatchFetch('http://test/api/archive?project='+projectId,{headers:await as(who+'@example.invalid')})).json()).archive;
+ const archived=await archiveOf('foreman');
+ assert.equal(archived.length,1,'a deleted Aufmaß lands in the archive');assert.equal(archived[0].reason,'falsche Baustelle');
+ const purge=async who=>mf.dispatchFetch('http://test/api/archive',{method:'POST',headers:{'Content-Type':'application/json',...await as(who+'@example.invalid')},body:JSON.stringify({projectId,id:archived[0].id})});
+ assert.equal((await purge('foreman')).status,403,'an Obermonteur cannot delete for good');
+ assert.equal((await purge('test-user')).status,403,'a Planer who is not on the purge list cannot delete for good');
+ assert.equal((await archiveOf('foreman')).length,1,'refused purges keep the archive');
+ assert.equal((await purge('alex')).status,200,'a person on the purge list can delete for good');
+ assert.equal((await archiveOf('alex')).length,0);
+ console.log('PASS: roles (Planer, Obermonteur, Buchhaltung read-only), server-owned prices, finished Aufmaße stay editable, removed review/billing/dispatch actions, deletion with reason, archive and permanent deletion only for the purge list.');
 
  assert.equal(business.weekOf('2027-01-01'),'2026-W53');assert.equal(business.parseDecimal('1.234,56'),1234.56);
  s=await state();const p=s.projects[0],again=(await call('saveReport',{report:{...input,date:'2026-10-05',endDate:'2026-10-05',lines:[{...input.lines[0],positionId:s.positions[0].id}]}})).id;await call('finalizeReport',{id:again});s=await state();
