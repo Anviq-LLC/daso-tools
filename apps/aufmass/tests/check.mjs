@@ -13,6 +13,7 @@ import {checkTimeReports} from './time-reports.mjs';
 import {checkCompanyAdjustments} from './company-adjustments.mjs';
 import {checkSharedEmployees} from './shared-employees.mjs';
 import {checkAttachmentStorage} from './attachment-storage.mjs';
+import {linkPlan} from './plan-seed.mjs';
 
 const require=createRequire(import.meta.url),out='/tmp/aufmass-tests';
 await mkdir(out,{recursive:true});
@@ -25,8 +26,8 @@ const {PDFDocument}=require('pdf-lib');
 const nativeFetch=globalThis.fetch;globalThis.fetch=async url=>typeof url==='string'&&url.startsWith('/')?new Response(await readFile('public'+url)):nativeFetch(url);
 
 const script=await readFile(out+'/worker.mjs','utf8');
-const mf=new Miniflare({modules:true,script,bindings:{DASO_PLAN_SYNC_SECONDS:'0',DASO_OWNER_EMAIL:'test-user@example.invalid',DASO_PURGE_EMAILS:'alex@example.invalid',...accessBindings,DASO_SETTINGS_KEY:Buffer.alloc(32,7).toString('base64')},d1Databases:['DB','PLAN_DB'],r2Buckets:['BUCKET'],compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat']});
-const db=await mf.getD1Database('DB'),plan=await mf.getD1Database('PLAN_DB');
+const mf=new Miniflare({modules:true,script,bindings:{DASO_PLAN_SYNC_SECONDS:'0',DASO_OWNER_EMAIL:'test-user@example.invalid',DASO_PURGE_EMAILS:'alex@example.invalid',...accessBindings,DASO_SETTINGS_KEY:Buffer.alloc(32,7).toString('base64')},d1Databases:['DB','PLAN_DB','NU_DB'],r2Buckets:['BUCKET'],compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat']});
+const db=await mf.getD1Database('DB'),plan=await mf.getD1Database('PLAN_DB'),nu=await mf.getD1Database('NU_DB');
 const sql=await readFile('drizzle/0000_hard_bill_hollister.sql','utf8');
 await plan.prepare("CREATE TABLE users (id text primary key, email text not null, name text not null default '', access_role text not null default 'monteur', resource_id text)").run();
 for(const s of sql.split('--> statement-breakpoint'))await db.prepare(s.trim()).run();
@@ -34,6 +35,7 @@ const headers={'Content-Type':'application/json',...await as('test-user@example.
 let projectId='';
 async function state(){const r=await mf.dispatchFetch('http://test/api/data?project='+projectId,{headers});assert.equal(r.status,200);return r.json();}
 async function call(action,payload={},expected=200,who='test-user'){
+ if(action==='saveProject'&&!(payload.projectId??projectId)&&payload.project&&!payload.project.planId&&expected===200)payload={...payload,project:{...payload.project,planId:await linkPlan(plan,payload.project)}};
  if(['saveProjectEmployees','saveProjectPeople'].includes(action)&&payload.employeeDirectoryToken===undefined)payload={...payload,employeeDirectoryToken:(await state()).employeeDirectory.token};
  const r=await mf.dispatchFetch('http://test/api/data',{method:'POST',headers:{'Content-Type':'application/json',...await as(who+'@example.invalid')},body:JSON.stringify({action,projectId,...payload})});
  const j=await r.json();assert.equal(r.status,expected,JSON.stringify(j));return j;
@@ -55,9 +57,30 @@ try{
  assert.equal((await mf.dispatchFetch('http://test/api/data',{headers:await as('book@example.invalid')})).status,200,'Buchhaltung reads');
  assert.equal((await mf.dispatchFetch('http://test/api/company',{method:'POST',headers:{'Content-Type':'application/json',...await as('foreman@example.invalid')},body:'{}'})).status,400,'only a Planer edits the company');
 
+ const create=async project=>(await mf.dispatchFetch('http://test/api/data',{method:'POST',headers,body:JSON.stringify({action:'saveProject',projectId:'',project})})).status;
+ assert.equal(await create({name:'Ohne Einteilung',number:'NOPLAN',factor:.9}),400,'a project needs an Einteilung link');
+ assert.equal(await create({name:'Unbekannt',number:'NOPLAN',factor:.9,planId:'missing'}),400,'the link must exist in Einteilung');
  projectId=(await call('saveProject',{project:{name:'Prüfprojekt',number:'TEST-2026',customer:'Kunde',areas:['EG','OG'],factor:.9,measurementEmail:'kunde@example.invalid',contact:'Alexander Pankratz',foremanName:'Alexander Pankratz'}})).id;
+ assert.equal(await create({name:'Doppelt',number:'TEST-2026',factor:.9,planId:(await state()).projects[0].planId}),400,'an Einteilung project is linked once');
  const roster=[{id:'regular-a',firstName:'Alexander',lastName:'Pankratz',code:'FAKE'},{id:'regular-b',firstName:'Jan',lastName:'Sommer',code:'FAKE'}];
  await call('saveProjectPeople',{updatedAt:(await state()).projects[0].updatedAt,employees:roster,teams:[]});
+ {
+  // Firms, workers and rates come from the Nachunternehmer tool once its switch is on.
+  const planned=(await state()).projects[0].planId;
+  await plan.batch([plan.prepare("INSERT INTO resources (id,name,kind) VALUES ('nu-res','Firma Eins GmbH','contractor')"),plan.prepare("INSERT INTO assignments (resource_id,project_id,day,assignment_type,count) VALUES ('nu-res',?,'2026-11-02','project',1)").bind(planned)]);
+  const nuState=on=>({settings:{nuMaster:on},companies:[{id:'co1',name:'Firma Eins GmbH',aliases:[]}],workers:[{companyId:'co1',name:'Max Mustermann',role:'Monteur'},{companyId:'co1',name:'Olga Ober',role:'Obermonteur'}],projectAgreements:[{companyId:'co1',allProjects:true,fitterRateCents:3500,foremanRateCents:4500}]});
+  await nu.prepare('CREATE TABLE state (id text primary key, data text not null)').run();
+  await nu.prepare("INSERT INTO state VALUES ('main',?)").bind(JSON.stringify(nuState(false))).run();
+  let team=(await state()).projects[0].teams.find(t=>t.company==='Firma Eins GmbH');
+  assert(team&&!team.nuId,'without the switch the team keeps the planning placeholder');
+  await nu.prepare("UPDATE state SET data=? WHERE id='main'").bind(JSON.stringify(nuState(true))).run();
+  team=(await state()).projects[0].teams.find(t=>t.company==='Firma Eins GmbH');
+  assert.equal(team.nuId,'co1');assert.deepEqual(team.members,[{name:'Max Mustermann',role:'fitter',hourlyRate:3500},{name:'Olga Ober',role:'foreman',hourlyRate:4500}],'workers and rates follow Nachunternehmer');
+  const before=(await state()).projects[0];
+  await call('saveProjectTeams',{updatedAt:before.updatedAt,teams:[{...team,members:[{name:'Anderer',role:'fitter',hourlyRate:1}]}]});
+  assert.deepEqual((await state()).projects[0].teams.find(t=>t.code===team.code).members,team.members,'a Nachunternehmer team cannot be edited here');
+  await plan.batch([plan.prepare("DELETE FROM assignments WHERE resource_id='nu-res'"),plan.prepare("DELETE FROM resources WHERE id='nu-res'")]);await nu.prepare("UPDATE state SET data=? WHERE id='main'").bind(JSON.stringify(nuState(false))).run();
+ }
  await call('importLV',{positions:[{number:'1.1',description:'Spiralrohr DN 200 bis 3,5m',unit:'m',price:2383},{number:'1.2',description:'Spiralrohr DN 200 bis 5,5m',unit:'m',price:2860}]});
  let s=await state();const position=s.positions.find(p=>p.number==='1.1');
  const members=[{employeeId:'regular-a',name:'x',code:'FAKE',trial:false},{employeeId:'regular-b',name:'x',code:'FAKE',trial:false}];

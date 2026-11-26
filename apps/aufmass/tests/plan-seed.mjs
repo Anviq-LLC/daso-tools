@@ -1,0 +1,7 @@
+// Projects are created in Einteilung, so tests register each new project there before saving it here.
+export async function linkPlan(plan,p){
+ for(const q of ["CREATE TABLE IF NOT EXISTS customers (id text primary key, name text not null, address text not null default '')","CREATE TABLE IF NOT EXISTS contacts (customer_id text, name text, role text, email text, phone text, mobile text)","CREATE TABLE IF NOT EXISTS resources (id text primary key, name text not null, kind text not null, role text, sort_order integer default 0, archived_at text)","CREATE TABLE IF NOT EXISTS projects (id text primary key, name text not null, address text default '', customer_id text, foreman_id text, project_email text, order_number text, project_number text, sort_order integer default 0, archived_at text)","CREATE TABLE IF NOT EXISTS assignments (resource_id text, project_id text, day text, assignment_type text, count integer default 1)"])await plan.prepare(q).run();
+ const id=crypto.randomUUID(),cid='c-'+id,fid='f-'+id;
+ await plan.batch([plan.prepare('INSERT INTO customers (id,name) VALUES (?,?)').bind(cid,p.customer||''),plan.prepare("INSERT INTO resources (id,name,kind) VALUES (?,?,'office')").bind(fid,p.foremanName||''),plan.prepare('INSERT INTO projects (id,name,address,customer_id,foreman_id,order_number,project_number) VALUES (?,?,?,?,?,?,?)').bind(id,p.name,p.address||'',cid,fid,p.orderNumber||'',p.number)]);
+ return id;
+}

@@ -38,7 +38,7 @@ Worker secrets (`wrangler secret put <name> --name daso-aufmasstool`):
 | `CF_ACCESS_AUD` | Audience tag of the Cloudflare Access application |
 | `DASO_OWNER_EMAIL` | Email that is always a Planer |
 
-Roles come from the Montageplanung users table. Buchhaltung can read everything but cannot change data. `access:<email>` records in `records` (Planer or Obermonteur) cover people who are not listed there, and `DASO_OWNER_EMAIL` is always a Planer.
+Subcontractor teams, workers and hourly rates come from the Nachunternehmer database (`NU_DB`, read-only) once its source switch is on; without the binding or the switch the teams work as before. Roles come from the Montageplanung users table. Buchhaltung can read everything but cannot change data. `access:<email>` records in `records` (Planer or Obermonteur) cover people who are not listed there, and `DASO_OWNER_EMAIL` is always a Planer.
 
 ## Build and deploy
 

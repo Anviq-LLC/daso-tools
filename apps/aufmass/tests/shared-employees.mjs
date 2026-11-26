@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {as,accessBindings} from './access.mjs';
+import {linkPlan} from './plan-seed.mjs';
 
 export async function checkSharedEmployees({Miniflare,script,sql,headers,project,ui}){
- const mf=new Miniflare({modules:true,script,bindings:{DASO_OWNER_EMAIL:'test-user@example.invalid',...accessBindings},d1Databases:['DB'],r2Buckets:['BUCKET'],compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat']});
+ const mf=new Miniflare({modules:true,script,bindings:{DASO_OWNER_EMAIL:'test-user@example.invalid',...accessBindings},d1Databases:['DB','PLAN_DB'],r2Buckets:['BUCKET'],compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat']});
  try{
   const db=await mf.getD1Database('DB');for(const statement of sql.split('--> statement-breakpoint'))await db.prepare(statement.trim()).run();
   const a={id:'old-a',firstName:'Alexander',lastName:'Pankratz',code:'AP'},b={id:'old-b',firstName:'Andreas',lastName:'Peters',code:'AP'},alias={...a,id:'other-a'};
@@ -18,7 +19,7 @@ export async function checkSharedEmployees({Miniflare,script,sql,headers,project
   assert.equal(bootstrap.length,2,'existing entries from all projects are included once');assert.equal(new Set(bootstrap.map(e=>e.code)).size,2,'legacy abbreviation collisions are resolved');assert(bootstrap.find(e=>e.id===alias.id).legacyIds.includes(a.id));assert.deepEqual(own(data,first.id).employees,own(data,second.id).employees);
   assert.deepEqual(data.reports[0].employeeMembers,oldReport.employeeMembers,'bootstrap leaves historical members intact');
   const crew=ui.renderCrew(own(data,first.id),oldReport);assert.equal((crew.match(/class="[^"]*\bcrew-button\b/g)||[]).length,3,'a historical alias does not create a second button for the same employee');assert(crew.includes('Mitarbeiter dieses Projekts'));
-  const inherited=(await post('saveProject','',{project:{...project,name:'Neue Baustelle',number:'NEW-1',employees:[],teams:[]}})).id;
+  const planned={...project,name:'Neue Baustelle',number:'NEW-1',employees:[],teams:[]},inherited=(await post('saveProject','',{project:{...planned,planId:await linkPlan(await mf.getD1Database('PLAN_DB'),planned)}})).id;
   data=await get(inherited);assert.deepEqual(own(data,inherited).employees,bootstrap,'new project inherits the whole roster without client-supplied employees');
   const added={id:'new-anna',firstName:'Anna',lastName:'Peters',code:'FAKE'};
   await saveRoster(first.id,[...bootstrap,added]);data=await get(second.id);
@@ -35,7 +36,7 @@ export async function checkSharedEmployees({Miniflare,script,sql,headers,project
   await post('saveProject',second.id,{project:{...own(data,second.id),name:'Stammdaten geändert',employees:bootstrap}});
   assert((await get(first.id)).employeeDirectory.employees.some(e=>e.id===alias.id&&e.lastName==='Neumann'),'stale project metadata cannot replace the shared roster');
   data=await get(second.id);await saveRoster(second.id,data.employeeDirectory.employees.filter(e=>e.id!==added.id));
-  const subsequent=(await post('saveProject','',{project:{...project,name:'Weitere Baustelle',number:'NEW-2',employees:[],teams:[]}})).id;
+  const next={...project,name:'Weitere Baustelle',number:'NEW-2',employees:[],teams:[]},subsequent=(await post('saveProject','',{project:{...next,planId:await linkPlan(await mf.getD1Database('PLAN_DB'),next)}})).id;
   data=await get(subsequent);assert.equal(data.employeeDirectory.employees.length,2);assert(!own(data,subsequent).employees.some(e=>e.id===added.id),'removed employees are not revived from older project records');
   const nu={code:'T1',company:'Projektfirma',members:[{name:'Monteur 1',role:'fitter',hourlyRate:3200},{name:'Monteur 2',role:'foreman',hourlyRate:4100}]},beforeTeamToken=data.employeeDirectory.token;
   data=await get(first.id);await post('saveProjectTeams',first.id,{teams:[nu],updatedAt:own(data,first.id).updatedAt});data=await get(second.id);assert.equal(own(data,first.id).teams[0].company,nu.company);assert.deepEqual(own(data,first.id).teams[0].members,nu.members);assert.equal(own(data,second.id).teams.length,0);assert.equal(data.employeeDirectory.token,beforeTeamToken,'contractor-only edits leave the shared roster untouched');

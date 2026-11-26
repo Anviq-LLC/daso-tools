@@ -7,6 +7,16 @@ export async function checkLinkedExtras({call,state,upload,business,weeks,pdf,PD
  await call('saveProjectTeams',{updatedAt:project.updatedAt,teams:[{code:'T1',company:'Montagepartner',employees:['Karl Monteur','Klaus Monteur'],hourlyRate:3200}]});
  await call('importLV',{positions:[{number:'1.10',description:'Wickelfalzrohr NW 100',unit:'m',price:10000}]});data=await state();project=data.projects.find(p=>p.id===projectId);const person=project.employees[0],position=data.positions[0];
  const parentId=(await call('saveReport',{report:{date:'2026-10-19',endDate:'2026-10-19',team:'',crews:[{id:'own',team:person.code,employeeMembers:[{employeeId:person.id,trial:false}],teamWork:null,share:5000},{id:'sub',team:'T1',employeeMembers:[],teamWork:{code:'T1',company:'fake',hourlyRate:1,workers:[{name:'fake',hours:6},{name:'fake',hours:6}]},share:5000}],author:'Obermonteur',area:'EG',note:'Aufmaß',lines:[{positionId:position.id,quantity:10,remark:''}]}})).id;
+ {
+  // The same team twice on one day with different hours, and a worker taken out of a team.
+  const crew=(id,workers,share)=>({id,team:'T1',employeeMembers:[],teamWork:{code:'T1',company:'x',workers},share});
+  const twice=report=>({...report,date:'2026-10-20',endDate:'2026-10-20',team:'',author:'Obermonteur',area:'EG',note:'doppelt',lines:[{positionId:position.id,quantity:1,remark:''}]});
+  const dupId=(await call('saveReport',{report:twice({crews:[crew('a',[{name:'Karl Monteur',hours:4},{name:'Klaus Monteur',hours:2}],5000),crew('b',[{name:'Klaus Monteur',hours:6}],5000)]})})).id;
+  const dup=(await state()).reports.find(r=>r.id===dupId);
+  assert.deepEqual(dup.crews.map(c=>c.teamWork.workers.map(w=>[w.name,w.hours,w.hourlyRate])),[[['Karl Monteur',4,3200],['Klaus Monteur',2,3200]],[['Klaus Monteur',6,3200]]],'one team twice, one worker removed, rates from the project');
+  await call('saveReport',{report:twice({crews:[crew('a',[{name:'Fremd',hours:1}],10000)]})},400);
+  await call('deleteReport',{id:dupId,reason:'Testbericht'});
+ }
  data=await state();let parent=data.reports.find(r=>r.id===parentId);const original=JSON.stringify(parent),input=linked.linkedExtraDraft(parent,project);
  assert.equal(input.parentReportId,parentId);assert.equal(input.kind,'extra');assert(input.timeSheet.entries.every(e=>e.allowanceQuantity===0),'no second travel allowance by default');assert.equal(input.timeSheet.entries.length,3);assert.equal(input.author,parent.author);assert.equal(input.area,'EG');
  input.timeSheet.entries=input.timeSheet.entries.filter(e=>[person.id,'sub:T1:0'].includes(e.workerId)).map(e=>({...e,start:e.workerId===person.id?'15:00':'16:00',end:e.workerId===person.id?'16:00':'17:30',pauseMinutes:0,task:'Mehraufwand: bauliche Anpassung',rates:{billingHourly:1,costHourly:1},billingHourlyOverride:1}));input.timeSheet.factor=.01;

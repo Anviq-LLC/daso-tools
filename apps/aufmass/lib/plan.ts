@@ -1,4 +1,5 @@
 import {env} from 'cloudflare:workers';
+import type {NuDirectory} from './nu-team';
 type Row=Record<string,string|null>;
 export type PlanDay={employees:string[];contractors:{name:string;count:number}[]};
 export type PlanProject={id:string;name:string;address:string;email:string;orderNumber:string;number:string;customer:string;foreman:string;contacts:{name:string;role:string;email:string;phone:string}[]};
@@ -32,4 +33,14 @@ export async function readPlanPeople(projectId:string):Promise<string[]>{
  const plan=(env as unknown as {PLAN_DB?:D1Database}).PLAN_DB;if(!plan)return[];
  const rows=await plan.prepare("SELECT DISTINCT r.name AS name FROM assignments a JOIN resources r ON r.id = a.resource_id WHERE a.project_id = ? AND r.kind = 'employee' AND r.archived_at IS NULL AND a.assignment_type = 'project' ORDER BY r.name").bind(projectId).all<Row>();
  return rows.results.map(r=>r.name||'');
+}
+
+// Read-only view of the Nachunternehmer tool. It counts only once its switch is on; any failure means "not available".
+export async function readNuDirectory():Promise<NuDirectory|null>{
+ try{
+  const nu=(env as unknown as {NU_DB?:D1Database}).NU_DB;if(!nu)return null;
+  const row=await nu.prepare("SELECT data FROM state WHERE id = 'main'").first<{data:string}>();if(!row)return null;
+  const s=JSON.parse(row.data) as {settings?:{nuMaster?:boolean};companies?:NuDirectory['companies'];workers?:NuDirectory['workers'];projectAgreements?:NuDirectory['projectAgreements']};
+  return s.settings?.nuMaster?{companies:s.companies||[],workers:s.workers||[],projectAgreements:s.projectAgreements||[]}:null;
+ }catch{return null;}
 }

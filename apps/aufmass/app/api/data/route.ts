@@ -11,7 +11,8 @@ import {contactText,validateProjectContacts} from '@/lib/project-contacts';
 import {manualPositionDetails,positionNumberKey} from '@/lib/manual-positions';
 import {approvedLVDescriptionChanges} from '@/lib/approved-lv-descriptions';
 import {canonicalCrews,reportCrews,measurementHoursIssues} from '@/lib/report-crews';
-import {readPlan} from '@/lib/plan';
+import {readPlan,readNuDirectory} from '@/lib/plan';
+import {nuTeam,applyNuTeam} from '@/lib/nu-team';
 import {env} from 'cloudflare:workers';
 
 function text(v:unknown,max=2000){return String(v??'').trim().slice(0,max);}
@@ -33,6 +34,9 @@ export async function GET(request:Request){try{const user=await actor(request);a
 export async function POST(request:Request){try{
  const user=await actor(request);need(Number(request.headers.get('content-length')||0)<3_000_000,'Import ist zu groß. Bitte aufteilen.');const b=await request.json() as {action:string;projectId:string;project:Project;positions:Position[];report:Report;id:string;updatedAt:string;reason:string;note:string;week:string;amount:number;number:string;date:string;closureId:string;reference:string;reportIds:string[];versions:Record<string,string>;area:string;fileId:string;to:string;cc:string;subject:string;body:string;includeSummary:boolean};const action=text(b.action,50),now=new Date().toISOString();let projectId=text(b.projectId,100);
  if(action==='saveProject'&&!projectId){
+  const planId=text(b.project?.planId,100);
+  need(planId&&(await readPlan()).projects.some(m=>m.id===planId),'Projekte werden in der Einteilung angelegt.');
+  need(!await db().prepare("SELECT 1 AS n FROM records WHERE kind = 'project' AND json_extract(data,'$.planId') = ?").bind(planId).first(),'Dieses Projekt ist bereits angelegt.');
   const id=crypto.randomUUID(),directory=await readEmployeeDirectory(),p=projectValues(b.project,id,now),employees=addDirectoryEmployees(directory.employees,projectEmployees(b.project.employees||[],directory.employees));
   p.employees=employees;const changed=directory.token.startsWith('legacy-')||JSON.stringify(employees)!==JSON.stringify(directory.employees),next=changed?{...directory,employees,token:crypto.randomUUID(),updatedAt:now}:undefined;
   await createProject(p,user,next,directory.token);return Response.json({id});
@@ -159,6 +163,7 @@ async function syncPlanProjects(){
  // Contractors become teams only in projects where Montageplanung assigns them.
  const rows2=await db().prepare("SELECT data FROM records WHERE kind = 'project'").all<{data:string}>();
  const cleaned=await db().prepare("SELECT 1 AS n FROM records WHERE id = 'migration:plan-teams-1'").first();
+ const nuDir=await readNuDirectory();
  for(const row of rows2.results){
   const p=JSON.parse(row.data) as Project;if(!p.planId)continue;
   const mine=plan.assigned.filter(a=>a.projectId===p.planId),assignedNames=new Set(mine.map(a=>a.name.trim().toLowerCase())),contractorNames=new Set(plan.contractors.map(c=>c.name.trim().toLowerCase()));
@@ -171,8 +176,9 @@ async function syncPlanProjects(){
   const codes=new Set(teams.map(t=>t.code)),added:ProjectTeam[]=[];
   for(const a of mine){
    const name=a.name.trim(),workers:TeamMember[]=[name,...(a.max>=2?[name+' 2']:[])].map(n=>({name:n,role:'fitter',hourlyRate:null})),t=teams.find(x=>x.planId===a.contractorId)||teams.find(x=>!x.planId&&x.company.trim().toLowerCase()===name.toLowerCase());
-   if(t){t.planId=a.contractorId;t.company=name;if(!teamMembers(t).some(m=>m.name))t.members=workers;}
-   else if(name){let n=1;while([...codes].some(c=>c.match(/^T(\d+)/)?.[1]===String(n)))n++;const letters=name.replace(/[^\p{L}]/gu,'').toUpperCase(),tags=new Set([...codes].map(c=>c.replace(/^T\d+/,'')));let len=Math.min(1,letters.length);while(len<letters.length&&tags.has(letters.slice(0,len)))len++;const code='T'+n+letters.slice(0,len);codes.add(code);added.push({code,company:name,planId:a.contractorId,members:workers});}
+   const nt=nuDir?nuTeam(nuDir,name,p.planId!):null;
+   if(t){t.planId=a.contractorId;t.company=name;if(!teamMembers(t).some(m=>m.name))t.members=workers;if(nt)Object.assign(t,applyNuTeam(t,nt,teamMembers(t)));}
+   else if(name){let n=1;while([...codes].some(c=>c.match(/^T(\d+)/)?.[1]===String(n)))n++;const letters=name.replace(/[^\p{L}]/gu,'').toUpperCase(),tags=new Set([...codes].map(c=>c.replace(/^T\d+/,'')));let len=Math.min(1,letters.length);while(len<letters.length&&tags.has(letters.slice(0,len)))len++;const code='T'+n+letters.slice(0,len);codes.add(code);added.push(nt?applyNuTeam({code,company:name,planId:a.contractorId,members:workers},nt,workers):{code,company:name,planId:a.contractorId,members:workers});}
   }
   const next=[...teams,...added];
   if(JSON.stringify(next)!==JSON.stringify(p.teams||[])){try{await commit(p.id,'Nachunternehmer aus Montageplanung','Montageplanung',[{kind:'project',value:{...p,teams:next,updatedAt:new Date().toISOString()} as Project}],[],added.map(t=>t.company).join(', '));}catch{/* retried on the next load */}}
@@ -186,7 +192,7 @@ function projectValues(v:Project,id:string,now:string):Project{
 
 // An unreachable planning database must not block saving; the names are then not checked.
 async function planContractors(){try{return (await readPlan()).contractors;}catch{return [];}}
-function projectTeams(input:ProjectTeam[],previous:ProjectTeam[]=[],contractors:{id:string;name:string}[]=[]):ProjectTeam[]{need(Array.isArray(input)&&input.length<=100,'Bitte höchstens 100 Teams hinterlegen.');const codes=new Set<string>();const teams:ProjectTeam[]=input.map(t=>{const code=text(t.code,80);need(code&&!codes.has(code),'Teamkürzel fehlt oder ist doppelt.');codes.add(code);const members=teamMembers(t);need(members.length<=20,'Bitte höchstens 20 Mitarbeiter je Team hinterlegen.');const cleanMembers=members.map(m=>{need(m.role==='fitter'||m.role==='foreman','Bitte Monteur oder Obermonteur auswählen.');return{name:text(m.name,160),role:m.role,hourlyRate:m.hourlyRate===null||m.hourlyRate===undefined?null:integer(m.hourlyRate,1e8)};}),prior=previous.find(x=>x.code===code&&x.planId);let company=prior?prior.company:text(t.company,200),planId=prior?.planId;if(!prior&&contractors.length){const key=(v:string)=>v.trim().normalize('NFKC').toLowerCase().replace(/\s+/g,' '),hit=contractors.find(c=>c.id===t.planId||key(c.name)===key(company));need(hit,'Nachunternehmer bitte aus der Montageplanung auswählen.');company=hit!.name;planId=hit!.id;}return{code,company,members:cleanMembers,...(planId?{planId}:{})};});for(const prior of previous)if(prior.planId&&!codes.has(prior.code))teams.push(prior);return teams;}
+function projectTeams(input:ProjectTeam[],previous:ProjectTeam[]=[],contractors:{id:string;name:string}[]=[]):ProjectTeam[]{need(Array.isArray(input)&&input.length<=100,'Bitte höchstens 100 Teams hinterlegen.');const codes=new Set<string>();const teams:ProjectTeam[]=input.map(t=>{const code=text(t.code,80);need(code&&!codes.has(code),'Teamkürzel fehlt oder ist doppelt.');codes.add(code);const locked=previous.find(x=>x.code===code&&x.nuId);if(locked)return locked;const members=teamMembers(t);need(members.length<=20,'Bitte höchstens 20 Mitarbeiter je Team hinterlegen.');const cleanMembers=members.map(m=>{need(m.role==='fitter'||m.role==='foreman','Bitte Monteur oder Obermonteur auswählen.');return{name:text(m.name,160),role:m.role,hourlyRate:m.hourlyRate===null||m.hourlyRate===undefined?null:integer(m.hourlyRate,1e8)};}),prior=previous.find(x=>x.code===code&&x.planId);let company=prior?prior.company:text(t.company,200),planId=prior?.planId;if(!prior&&contractors.length){const key=(v:string)=>v.trim().normalize('NFKC').toLowerCase().replace(/\s+/g,' '),hit=contractors.find(c=>c.id===t.planId||key(c.name)===key(company));need(hit,'Nachunternehmer bitte aus der Montageplanung auswählen.');company=hit!.name;planId=hit!.id;}return{code,company,members:cleanMembers,...(planId?{planId}:{})};});for(const prior of previous)if(prior.planId&&!codes.has(prior.code))teams.push(prior);return teams;}
 
 function projectEmployees(input:ProjectEmployee[],previous:ProjectEmployee[]=[]):ProjectEmployee[]{
  need(Array.isArray(input)&&input.length<=500,'Bitte höchstens 500 Mitarbeiter hinterlegen.');const ids=new Set<string>();

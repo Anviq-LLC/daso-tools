@@ -4,7 +4,7 @@ import {writeFile} from 'node:fs/promises';
 export async function checkTimeReports({call,state,upload,mf,headers,business,pdf,ui,PDFDocument,setProjectId}){
  const time=await import('/tmp/aufmass-tests/modules/time-reports.js');
  const previous=await state(),originalReports=JSON.stringify(previous.reports);
- const projectId=(await call('saveProject',{projectId:'',project:{...previous.projects.find(p=>p.id===previous.reports[0]?.projectId)||previous.projects[0],id:'',name:'Stundenberichte Test',number:'TIME-2026',factor:.9,timeRates:undefined}})).id;setProjectId(projectId);
+ const projectId=(await call('saveProject',{projectId:'',project:{...previous.projects.find(p=>p.id===previous.reports[0]?.projectId)||previous.projects[0],id:'',planId:undefined,name:'Stundenberichte Test',number:'TIME-2026',factor:.9,timeRates:undefined}})).id;setProjectId(projectId);
  let data=await state(),project=data.projects.find(p=>p.id===projectId);
  assert.equal(project.timeRates.fitter.costHourly,null);assert.equal(project.timeRates.foreman.costHourly,null);assert.equal(project.timeRates.fitter.billingHourly,null);
  const people=project.employees.slice(0,2);assert.equal(people.length,2);assert.deepEqual(time.timeDates('2027-01-01','week'),['2026-12-28','2026-12-29','2026-12-30','2026-12-31','2027-01-01','2027-01-02','2027-01-03']);

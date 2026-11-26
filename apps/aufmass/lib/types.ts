@@ -1,6 +1,6 @@
 export type TeamMember = {name:string;role:WorkerRole;hourlyRate:number|null};
 // employees and hourlyRate are the legacy two-slot shape, read through teamMembers().
-export type ProjectTeam = {planId?:string;code:string;company:string;members?:TeamMember[];employees?:[string,string];hourlyRate?:number|null};
+export type ProjectTeam = {planId?:string;nuId?:string;code:string;company:string;members?:TeamMember[];employees?:[string,string];hourlyRate?:number|null};
 export type ProjectEmployee = {planId?:string;inactive?:boolean;id:string;firstName:string;lastName:string;code:string;legacyIds?:string[]};
 export type ProjectContact = {id:string;name:string;role:string;phone:string;email:string;legacyText?:string};
 export type EmployeeDirectory = {id:string;employees:ProjectEmployee[];token:string;updatedAt:string};
